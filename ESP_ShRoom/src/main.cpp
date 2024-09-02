@@ -2,6 +2,9 @@
 #include "uFire_SHT20.h"
 #include <WiFi.h>
 #include <WebServer.h>
+#include <Preferences.h>  // Für das Speichern von Werten in NVS
+#include "web_handlers.h"
+
 
 // Sensor-Instanzen
 uFire_SHT20 sht20_1;  // Sensor 1 an Pin 21, 22
@@ -24,147 +27,58 @@ float targetTemperature = 22.0;  // Standardwert 22°C
 int hours = 0;
 int minutes = 0;
 int seconds = 0;
+int lastSavedMinute = -1;  // Um die Minute zu verfolgen, die zuletzt gespeichert wurde
 unsigned long lastUpdateTime = 0; // Variable zum Speichern der letzten Aktualisierungszeit
+
+Preferences preferences;
 
 const char* ssid = "ESP32_AP";
 const char* password = "12345678";
 
 WebServer server(80);
 
-// Funktion zur Aktualisierung der Zeit
-void updateTime() {
-  unsigned long currentMillis = millis();
-  if (currentMillis - lastUpdateTime >= 1000) { // Eine Sekunde vergangen?
-    lastUpdateTime = currentMillis;
-    seconds++;
-    if (seconds >= 60) {
-      seconds = 0;
-      minutes++;
-      if (minutes >= 60) {
-        minutes = 0;
-        hours++;
-        if (hours >= 24) {
-          hours = 0;
-        }
-      }
-    }
-  }
-}
+
 
 void handleRoot() {
-  String html = "<html><body>";
-  html += "<h1>ESP32 Steuerung</h1>";
-  
-  // Uhranzeige
-  html += "<h2>Aktuelle Uhrzeit</h2>";
-  html += "<div id='time'>Laden...</div>";
-  html += "<a href=\"/setTime\"><button>Uhrzeit einstellen</button></a>";
-  
-  // Anzeige der aktuellen Lüftereinschaltdauer und Soll-Temperatur
-  html += "<h2>Aktuelle Sollwerte</h2>";
-  html += "Einschaltdauer L&uuml;fter 1: " + String(fan1DutyCycle) + " %<br>";
-  html += "Einschaltdauer L&uuml;fter 2: " + String(fan2DutyCycle) + " %<br>";
-  html += "Soll-Temperatur: " + String(targetTemperature, 1) + " &deg;C<br>";
-  html += "<a href=\"/set_values\"><button>Sollwerte umstellen</button></a>";
+    String html = "<html><body>";
+    html += "<h1>ESP32 Steuerung</h1>";
 
-  // Ausgabe der aktuellen Sensordaten
-  html += "<h2>Sensordaten</h2>";
-  html += "Temperatur 1: " + String(temperature1, 1) + " &deg;C<br>";
-  html += "Temperatur 2: " + String(temperature2, 1) + " &deg;C<br>";
-  html += "Luftfeuchtigkeit 1: " + String(humidity1, 1) + " %<br>";
-  html += "Luftfeuchtigkeit 2: " + String(humidity2, 1) + " %<br>";
+    // Uhranzeige
+    html += "<h2>Aktuelle Uhrzeit</h2>";
+    html += "<div id='time'>Laden...</div>";
+    html += "<a href=\"/setTime\"><button>Uhrzeit einstellen</button></a>";
 
-  html += "<script>";
-  html += "function updateClock() {";
-  html += "  var xhr = new XMLHttpRequest();";
-  html += "  xhr.onreadystatechange = function() {";
-  html += "    if (xhr.readyState == 4 && xhr.status == 200) {";
-  html += "      document.getElementById('time').innerHTML = xhr.responseText;";
-  html += "    }";
-  html += "  };";
-  html += "  xhr.open('GET', '/time', true);";
-  html += "  xhr.send();";
-  html += "}";
-  html += "setInterval(updateClock, 1000);";
-  html += "</script>";
-  
-  html += "</body></html>";
+    // Anzeige der aktuellen Lüftereinschaltdauer und Soll-Temperatur
+    html += "<h2>Aktuelle Sollwerte</h2>";
+    html += "Einschaltdauer L&uuml;fter 1: " + String(fan1DutyCycle) + " %<br>";
+    html += "Einschaltdauer L&uuml;fter 2: " + String(fan2DutyCycle) + " %<br>";
+    html += "Soll-Temperatur: " + String(targetTemperature, 1) + " &deg;C<br>";
+    html += "<a href=\"/set_values\"><button>Sollwerte umstellen</button></a>";
 
-  server.send(200, "text/html", html);
-}
+    // Ausgabe der aktuellen Sensordaten
+    html += "<h2>Sensordaten</h2>";
+    html += "Temperatur 1: " + String(temperature1, 1) + " &deg;C<br>";
+    html += "Temperatur 2: " + String(temperature2, 1) + " &deg;C<br>";
+    html += "Luftfeuchtigkeit 1: " + String(humidity1, 1) + " %<br>";
+    html += "Luftfeuchtigkeit 2: " + String(humidity2, 1) + " %<br>";
 
-// Funktion, um die aktuelle Uhrzeit als Text zurückzugeben
-void handleTime() {
-    String time = String(hours) + ":" + String(minutes) + ":" + String(seconds);
-    server.send(200, "text/plain", time);
-}
+    html += "<script>";
+    html += "function updateClock() {";
+    html += "  var xhr = new XMLHttpRequest();";
+    html += "  xhr.onreadystatechange = function() {";
+    html += "    if (xhr.readyState == 4 && xhr.status == 200) {";
+    html += "      document.getElementById('time').innerHTML = xhr.responseText;";
+    html += "    }";
+    html += "  };";
+    html += "  xhr.open('GET', '/time', true);";
+    html += "  xhr.send();";
+    html += "}";
+    html += "setInterval(updateClock, 1000);";
+    html += "</script>";
 
-// Funktion für die Seite zum Einstellen der Lüftereinschaltdauer und Soll-Temperatur
-void handleSetValuesPage() {
-  String html = "<html><body>";
-  html += "<h1>Sollwerte umstellen</h1>";
-  html += "<form action=\"/update_values\" method=\"POST\">";
-  
-  // Eingabefelder für Lüftereinschaltdauer in Prozent
-  html += "Einschaltdauer L&uuml;fter 1 (in Prozent): ";
-  html += "<input type=\"number\" name=\"fan1\" value=\"" + String(fan1DutyCycle) + "\" min=\"0\" max=\"100\"><br>";
-  html += "Einschaltdauer L&uuml;fter 2 (in Prozent): ";
-  html += "<input type=\"number\" name=\"fan2\" value=\"" + String(fan2DutyCycle) + "\" min=\"0\" max=\"100\"><br>";
-  
-  // Eingabefeld für Soll-Temperatur
-  html += "Soll-Temperatur (in &deg;C): ";
-  html += "<input type=\"number\" name=\"targetTemp\" value=\"" + String(targetTemperature) + "\" step=\"0.1\"><br>";
-  
-  html += "<input type=\"submit\" value=\"Werte setzen\">";
-  html += "</form>";
-  html += "</body></html>";
+    html += "</body></html>";
 
-  server.send(200, "text/html", html);
-}
-
-// Funktion, um die Sollwerte zu setzen
-void handleSetValues() {
-    if (server.hasArg("fan1")) {
-        fan1DutyCycle = server.arg("fan1").toInt();
-    }
-
-    if (server.hasArg("fan2")) {
-        fan2DutyCycle = server.arg("fan2").toInt();
-    }
-
-    if (server.hasArg("targetTemp")) {
-        targetTemperature = server.arg("targetTemp").toFloat();
-    }
-
-    server.sendHeader("Location", "/"); // Umleitung zur Root-Seite
-    server.send(303); // 303 Redirect
-}
-
-// Funktion für die Uhrzeit Einstellungsseite
-void handleSetTimePage() {
-  String html = "<html><body>";
-  html += "<h1>Uhrzeit einstellen</h1>";
-  html += "<form action=\"/updateTime\" method=\"POST\">";
-  html += "Stunde: <input type=\"text\" name=\"hour\" value=\"" + String(hours) + "\"><br>";
-  html += "Minute: <input type=\"text\" name=\"minute\" value=\"" + String(minutes) + "\"><br>";
-  html += "<input type=\"submit\" value=\"Setze Uhrzeit\">";
-  html += "</form>";
-  html += "</body></html>";
-  server.send(200, "text/html", html);
-}
-
-// Funktion, um die Uhrzeit zu setzen
-void handleSetTime() {
-  if (server.method() == HTTP_POST) {
-    hours = server.arg("hour").toInt();
-    minutes = server.arg("minute").toInt();
-    seconds = 0; // Sekunden auf 0 setzen
-    lastUpdateTime = millis(); // Startzeitpunkt speichern
-    server.sendHeader("Location", "/"); // Umleitung zur Root-Seite
-    server.send(303); // 303 Redirect
-  } else {
-    server.send(405, "text/html", "Methode nicht erlaubt!");
-  }
+    server.send(200, "text/html", html);
 }
 
 void setup() {
@@ -198,20 +112,24 @@ void setup() {
     server.on("/update_values", handleSetValues); // Route um die Sollwerte zu aktualisieren
     server.begin();
     Serial.println("Webserver gestartet");
+
+    // NVS Initialisierung und Werte laden
+    preferences.begin("my-app", false);
+    loadSettings();
 }
 
 void loop() {
-  // Sensordaten aktualisieren
-  Wire.begin(21, 22); 
-  temperature1 = sht20_1.temperature();
-  humidity1 = sht20_1.humidity();
-  Wire.begin(18, 19);  // Wechsel zu Sensor 2
-  temperature2 = sht20_2.temperature();
-  humidity2 = sht20_2.humidity();
+    // Sensordaten aktualisieren
+    Wire.begin(21, 22); 
+    temperature1 = sht20_1.temperature();
+    humidity1 = sht20_1.humidity();
+    Wire.begin(18, 19);  // Wechsel zu Sensor 2
+    temperature2 = sht20_2.temperature();
+    humidity2 = sht20_2.humidity();
 
-  // Uhrzeit aktualisieren
-  updateTime();
+    // Uhrzeit aktualisieren
+    updateTime();
 
-  // Webserver anfragen bearbeiten
-  server.handleClient();
+    // Webserver anfragen bearbeiten
+    server.handleClient();
 }
