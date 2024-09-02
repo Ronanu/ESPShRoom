@@ -1,6 +1,5 @@
 #include <WiFi.h>
 #include <WebServer.h>
-#include <WebServer.h>
 
 // Webserver auf Port 80
 WebServer server(80);
@@ -33,7 +32,7 @@ void updateTime() {
 
 // Funktion für die Startseite
 void handleRoot() {
-  String html = "<html><head><meta http-equiv='refresh' content='1'></head><body>";
+  String html = "<html><head><meta http-equiv='refresh' content='1'></head><body style='background-color:black; color:white;'>";
   html += "<h1>Aktuelle Uhrzeit</h1>";
   html += "Stunde: " + String(hours) + "<br>";
   html += "Minute: " + String(minutes) + "<br>";
@@ -45,7 +44,7 @@ void handleRoot() {
 
 // Funktion für die Uhrzeit Einstellungsseite
 void handleSetTimePage() {
-  String html = "<html><body>";
+  String html = "<html><body style='background-color:black; color:white;'>";
   html += "<h1>Uhrzeit einstellen</h1>";
   html += "<form action=\"/updateTime\" method=\"POST\">";
   html += "Stunde: <input type=\"text\" name=\"hour\" value=\"" + String(hours) + "\"><br>";
