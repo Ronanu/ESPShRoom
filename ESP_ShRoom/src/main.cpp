@@ -1,17 +1,24 @@
+#include <Wire.h>
 #include <WiFi.h>
 #include <WebServer.h>
+#include <SHT2x.h>
 
-// Dummy-Werte für Sensoren
-float temperature1 = 25.3;
-float temperature2 = 26.7;
-float humidity1 = 45.8;
+// Instanzen für zwei SHT20-Sensoren
+SHT2x sht20_1;
+SHT2x sht20_2;
+
+// Sensordaten
+float temperature1 = 0.0;
+float humidity1 = 0.0;
+float temperature2 = 0.0;
+float humidity2 = 0.0;
 
 // Lüftereinschaltdauer (in Prozent)
-int fan1DutyCycle = 50;  // Standardwert 50%
-int fan2DutyCycle = 50;  // Standardwert 50%
+int fan1DutyCycle = 50;
+int fan2DutyCycle = 50;
 
 // Soll-Temperatur (in °C)
-float targetTemperature = 22.0;  // Standardwert 22°C
+float targetTemperature = 22.0;
 
 const char* ssid = "ESP32_AP";
 const char* password = "12345678";
@@ -39,8 +46,9 @@ void handleRoot() {
     // Ausgabe der aktuellen Sensordaten
     html += "<h2>Sensordaten</h2>";
     html += "Temperatur 1: " + String(temperature1) + " &deg;C<br>";
-    html += "Temperatur 2: " + String(temperature2) + " &deg;C<br>";
     html += "Luftfeuchtigkeit 1: " + String(humidity1) + " %<br>";
+    html += "Temperatur 2: " + String(temperature2) + " &deg;C<br>";
+    html += "Luftfeuchtigkeit 2: " + String(humidity2) + " %<br>";
     
     html += "</body></html>";
 
@@ -74,11 +82,19 @@ void handleSetValues() {
 void setup() {
     Serial.begin(115200);
 
-    // Konfiguration des ESP32 als Access Point
+    // WiFi Setup
     WiFi.softAP(ssid, password);
     Serial.println("Access Point gestartet");
     Serial.print("IP-Adresse: ");
     Serial.println(WiFi.softAPIP());
+
+    // I2C-Initialisierung für den ersten Sensor
+    Wire.begin(21, 22); // SDA = GPIO 21, SCL = GPIO 22
+    sht20_1.begin();
+
+    // I2C-Initialisierung für den zweiten Sensor
+    Wire.begin(18, 19); // SDA = GPIO 18, SCL = GPIO 19
+    sht20_2.begin();
 
     // Webserver Routen
     server.on("/", handleRoot);
@@ -88,8 +104,15 @@ void setup() {
 }
 
 void loop() {
-    // Hier würde man normalerweise die Sensordaten aktualisieren
-    // Für dieses Beispiel nehmen wir feste Dummy-Werte an
+    // Sensordaten vom ersten SHT20-Sensor aktualisieren
+    Wire.begin(21, 22); // Erste I2C-Verbindung
+    temperature1 = sht20_1.readTemperature();
+    humidity1 = sht20_1.readHumidity();
+
+    // Sensordaten vom zweiten SHT20-Sensor aktualisieren
+    Wire.begin(18, 19); // Zweite I2C-Verbindung
+    temperature2 = sht20_2.readTemperature();
+    humidity2 = sht20_2.readHumidity();
 
     server.handleClient();
 }
