@@ -1,10 +1,17 @@
+#include <Wire.h>
+#include "uFire_SHT20.h"
 #include <WiFi.h>
 #include <WebServer.h>
 
-// Dummy-Werte für Sensoren
-float temperature1 = 25.3;
-float temperature2 = 26.7;
-float humidity1 = 45.8;
+// Sensor-Instanzen
+uFire_SHT20 sht20_1;  // Sensor 1 an Pin 21, 22
+uFire_SHT20 sht20_2;  // Sensor 2 an Pin 18, 19
+
+// Sensordaten
+float temperature1;
+float temperature2;
+float humidity1;
+float humidity2;
 
 // Lüftereinschaltdauer (in Prozent)
 int fan1DutyCycle = 50;  // Standardwert 50%
@@ -38,9 +45,10 @@ void handleRoot() {
 
     // Ausgabe der aktuellen Sensordaten
     html += "<h2>Sensordaten</h2>";
-    html += "Temperatur 1: " + String(temperature1) + " &deg;C<br>";
-    html += "Temperatur 2: " + String(temperature2) + " &deg;C<br>";
-    html += "Luftfeuchtigkeit 1: " + String(humidity1) + " %<br>";
+    html += "Temperatur 1: " + String(temperature1, 1) + " &deg;C<br>";
+    html += "Temperatur 2: " + String(temperature2, 1) + " &deg;C<br>";
+    html += "Luftfeuchtigkeit 1: " + String(humidity1, 1) + " %<br>";
+    html += "Luftfeuchtigkeit 2: " + String(humidity2, 1) + " %<br>";
     
     html += "</body></html>";
 
@@ -74,6 +82,19 @@ void handleSetValues() {
 void setup() {
     Serial.begin(115200);
 
+    // Initialisierung der Sensoren
+    Wire.begin(21, 22);  // SDA, SCL für Sensor 1
+    if (!sht20_1.begin()) {
+        Serial.println("Sensor 1 nicht gefunden, überprüfe die Verkabelung!");
+        while (1);
+    }
+
+    Wire.begin(18, 19);  // SDA, SCL für Sensor 2
+    if (!sht20_2.begin()) {
+        Serial.println("Sensor 2 nicht gefunden, überprüfe die Verkabelung!");
+        while (1);
+    }
+
     // Konfiguration des ESP32 als Access Point
     WiFi.softAP(ssid, password);
     Serial.println("Access Point gestartet");
@@ -88,8 +109,15 @@ void setup() {
 }
 
 void loop() {
-    // Hier würde man normalerweise die Sensordaten aktualisieren
-    // Für dieses Beispiel nehmen wir feste Dummy-Werte an
+    // Sensordaten aktualisieren
+    Wire.begin(21, 22);  // Wechsel zu Sensor 1
+    temperature1 = sht20_1.temperature();
+    humidity1 = sht20_1.humidity();
 
+    Wire.begin(18, 19);  // Wechsel zu Sensor 2
+    temperature2 = sht20_2.temperature();
+    humidity2 = sht20_2.humidity();
+
+    // Webserver anfragen bearbeiten
     server.handleClient();
 }
