@@ -1,5 +1,8 @@
 #include <WiFi.h>
 #include <WebServer.h>
+#include <Preferences.h>
+
+Preferences preferences;  // Für den Zugriff auf den NVS
 
 // Webserver auf Port 80
 WebServer server(80);
@@ -28,6 +31,18 @@ void updateTime() {
       }
     }
   }
+}
+
+// Funktion zum Laden der gespeicherten Uhrzeit aus dem NVS
+void loadTimeFromNVS() {
+  hours = preferences.getInt("hours", 0); // Standardwert ist 0
+  minutes = preferences.getInt("minutes", 0); // Standardwert ist 0
+}
+
+// Funktion zum Speichern der Uhrzeit im NVS
+void saveTimeToNVS() {
+  preferences.putInt("hours", hours);
+  preferences.putInt("minutes", minutes);
 }
 
 // Funktion für die Startseite
@@ -72,13 +87,14 @@ void handleSetTimePage() {
   server.send(200, "text/html", html);
 }
 
-// Funktion, um die Uhrzeit zu setzen
+// Funktion, um die Uhrzeit zu setzen und im NVS zu speichern
 void handleSetTime() {
   if (server.method() == HTTP_POST) {
     hours = server.arg("hour").toInt();
     minutes = server.arg("minute").toInt();
     seconds = 0; // Sekunden auf 0 setzen
     lastUpdateTime = millis(); // Startzeitpunkt speichern
+    saveTimeToNVS(); // Speichert die geänderte Zeit im NVS
     server.sendHeader("Location", "/"); // Umleitung zur Root-Seite
     server.send(303); // 303 Redirect
   } else {
@@ -88,6 +104,13 @@ void handleSetTime() {
 
 void setup() {
   Serial.begin(115200);
+  
+  // Initialisierung des NVS
+  preferences.begin("my-app", false);
+  
+  // Laden der gespeicherten Uhrzeit
+  loadTimeFromNVS();
+
   WiFi.softAP("ESP32-AP", "12345678"); // Zugangspunkt (AP) erstellen
   server.on("/", handleRoot); // Route für die Startseite
   server.on("/time", handleTime); // Route für die aktuelle Uhrzeit
