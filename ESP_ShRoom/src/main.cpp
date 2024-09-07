@@ -1,86 +1,69 @@
-#include <Wire.h>
-#include "uFire_SHT20.h"
-#include <WiFi.h>
-#include <WebServer.h>
-#include <Preferences.h>
-#include "web_handlers.h"
+#include <Arduino.h>
+#include "fan_control.h"
 
-// Sensor-Instanzen
-uFire_SHT20 sht20_1;  // Sensor 1 an Pin 21, 22
-uFire_SHT20 sht20_2;  // Sensor 2 an Pin 18, 19
+// Eine gemeinsame Settings-Instanz für alle Lüfter
+struct Settings {
+    bool isEnabled1;
+    bool isEnabled2;
+    bool isEnabled3;
+    bool isEnabled4;
+    int onTime1;
+    int onTime2;
+    int onTime3;
+    int onTime4;
+    int onPercentage1;
+    int onPercentage2;
+    int onPercentage3;
+    int onPercentage4;
+};
 
-// Sensordaten
-float temperature1;
-float temperature2;
-float humidity1;
-float humidity2;
+// Eine Instanz der Settings
+Settings settings;
 
-// Globales Settings-Objekt
-Settings currentSettings;
-
-Preferences preferences;
-
-const char* ssid = "ESP32_AP";
-const char* password = "12345678";
-
-WebServer server(80);
+// FanControl-Instanzen für vier Lüfter
+FanControl* fanControl1;
+FanControl* fanControl2;
+FanControl* fanControl3;
+FanControl* fanControl4;
 
 void setup() {
-    Serial.begin(115200);
+    // Beispiel-Settings für Lüfter 1
+    settings.isEnabled1 = true;
+    settings.onTime1 = 60;         // 60 Sekunden Zykluszeit
+    settings.onPercentage1 = 50;   // 50% Einschaltdauer
 
-    // Initialisierung der Sensoren
-    Wire.begin(21, 22);  // SDA, SCL für Sensor 1
-    if (!sht20_1.begin()) {
-        Serial.println("Sensor 1 nicht gefunden, überprüfe die Verkabelung!");
-        while (1);
-    }
+    // Beispiel-Settings für Lüfter 2
+    settings.isEnabled2 = true;
+    settings.onTime2 = 60;         // 60 Sekunden Zykluszeit
+    settings.onPercentage2 = 40;   // 40% Einschaltdauer
 
-    Wire.begin(18, 19);  // SDA, SCL für Sensor 2
-    if (!sht20_2.begin()) {
-        Serial.println("Sensor 2 nicht gefunden, überprüfe die Verkabelung!");
-        while (1);
-    }
+    // Beispiel-Settings für Lüfter 3
+    settings.isEnabled3 = true;
+    settings.onTime3 = 60;         // 60 Sekunden Zykluszeit
+    settings.onPercentage3 = 60;   // 60% Einschaltdauer
 
-    // Konfiguration des ESP32 als Access Point
-    WiFi.softAP(ssid, password);
-    Serial.println("Access Point gestartet");
-    Serial.print("IP-Adresse: ");
-    Serial.println(WiFi.softAPIP());
+    // Beispiel-Settings für Lüfter 4
+    settings.isEnabled4 = true;
+    settings.onTime4 = 60;         // 60 Sekunden Zykluszeit
+    settings.onPercentage4 = 30;   // 30% Einschaltdauer
 
-    // NVS Initialisierung und Werte laden
-    preferences.begin("my-app", false);
-    loadSettings(&currentSettings, &preferences);
+    // FanControl-Instanzen erstellen und initialisieren
+    fanControl1 = new FanControl(&settings.isEnabled1, &settings.onTime1, &settings.onPercentage1, 25);  // GPIO 25
+    fanControl2 = new FanControl(&settings.isEnabled2, &settings.onTime2, &settings.onPercentage2, 26);  // GPIO 26
+    fanControl3 = new FanControl(&settings.isEnabled3, &settings.onTime3, &settings.onPercentage3, 27);  // GPIO 27
+    fanControl4 = new FanControl(&settings.isEnabled4, &settings.onTime4, &settings.onPercentage4, 14);  // GPIO 14
 
-    // Webserver Routen
-    server.on("/", [&]() { handleRoot(&currentSettings, server); });
-    server.on("/time", [&]() { handleTime(&currentSettings, server); });
-    server.on("/setTime", [&]() { handleSetTimePage(&currentSettings, server); });
-    server.on("/updateTime", [&]() { handleSetTime(&currentSettings, server, &preferences); });
-    server.on("/set_values", [&]() { handleSetValuesPage(&currentSettings, server); });
-    server.on("/update_values", [&]() { handleSetValues(&currentSettings, server, &preferences); });
-    server.begin();
-    Serial.println("Webserver gestartet");
+    // Initialisierung der FanControl-Instanzen
+    fanControl1->initialize();
+    fanControl2->initialize();
+    fanControl3->initialize();
+    fanControl4->initialize();
 }
 
 void loop() {
-    // Sensordaten aktualisieren
-    Wire.begin(21, 22); 
-    temperature1 = sht20_1.temperature();
-    humidity1 = sht20_1.humidity();
-    Wire.begin(18, 19);  // Wechsel zu Sensor 2
-    temperature2 = sht20_2.temperature();
-    humidity2 = sht20_2.humidity();
-
-    currentSettings.temperature1 = temperature1;
-    currentSettings.temperature2 = temperature2;
-    currentSettings.humidity1 = humidity1;
-    currentSettings.humidity2 = humidity2;
-
-    // Uhrzeit aktualisieren
-    updateTime(&currentSettings, &preferences);
-    Serial.println("Temperatur 1: " + String(temperature1, 1) + " °C, Luftfeuchtigkeit 1: " + String(humidity1, 1) + " %");
-    Serial.println("Temperatur 2: " + String(currentSettings.temperature2, 1) + " °C, Luftfeuchtigkeit 2: " + String(humidity2, 1) + " %");
-
-    // Webserver anfragen bearbeiten
-    server.handleClient();
+    // Aktualisiere den Lüfterstatus für alle vier Lüfter
+    fanControl1->update();
+    fanControl2->update();
+    fanControl3->update();
+    fanControl4->update();
 }
