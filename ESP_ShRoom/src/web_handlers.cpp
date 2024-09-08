@@ -108,12 +108,24 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "<div id='time'>Laden...</div>";
     html += "<a href=\"/setTime\"><button>Uhrzeit einstellen</button></a>";
 
-    // Anzeige der aktuellen Lüftereinschaltdauer und Soll-Temperatur
+    // Anzeige der aktuellen Lüfterlaufzeit und Zyklusanteil
     html += "<h2>Aktuelle Sollwerte</h2>";
-    html += "L&uuml;fter 1 Einschaltdauer: " + String(settings->onTime1) + " s, Einschaltdauer Prozent: " + String(settings->onPercentage1) + " %<br>";
-    html += "L&uuml;fter 2 Einschaltdauer: " + String(settings->onTime2) + " s, Einschaltdauer Prozent: " + String(settings->onPercentage2) + " %<br>";
-    html += "L&uuml;fter 3 Einschaltdauer: " + String(settings->onTime3) + " s, Einschaltdauer Prozent: " + String(settings->onPercentage3) + " %<br>";
-    html += "L&uuml;fter 4 Einschaltdauer: " + String(settings->onTime4) + " s, Einschaltdauer Prozent: " + String(settings->onPercentage4) + " %<br>";
+    html += "L&uuml;fter 1<br>";
+    html += "Aktive Laufzeit: " + String(settings->onTime1) + " Sekunden<br>";
+    html += "Zyklusanteil: " + String(settings->onPercentage1) + " %<br><br>";
+
+    html += "L&uuml;fter 2<br>";
+    html += "Aktive Laufzeit: " + String(settings->onTime2) + " Sekunden<br>";
+    html += "Zyklusanteil: " + String(settings->onPercentage2) + " %<br><br>";
+
+    html += "L&uuml;fter 3<br>";
+    html += "Aktive Laufzeit: " + String(settings->onTime3) + " Sekunden<br>";
+    html += "Zyklusanteil: " + String(settings->onPercentage3) + " %<br><br>";
+
+    html += "L&uuml;fter 4<br>";
+    html += "Aktive Laufzeit: " + String(settings->onTime4) + " Sekunden<br>";
+    html += "Zyklusanteil: " + String(settings->onPercentage4) + " %<br><br>";
+
     html += "Soll-Temperatur: " + String(settings->targetTemperature, 1) + " &deg;C<br>";
     html += "<a href=\"/set_values\"><button>Sollwerte umstellen</button></a>";
 
