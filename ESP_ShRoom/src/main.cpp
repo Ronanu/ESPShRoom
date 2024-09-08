@@ -67,6 +67,8 @@ void setup() {
     server.on("/setTime", [&]() { handleSetTimePage(&settings, server); });
     server.on("/updateTime", [&]() { handleSetTime(&settings, server, &preferences); });
     server.on("/set_values", [&]() { handleSetValuesPage(&settings, server); });
+    // Registriere den Endpunkt für die Datenaktualisierung
+    server.on("/updateData", [&]() { handleUpdateData(&settings, server); });
     server.on("/update_values", [&]() { handleSetValues(&settings, server, &preferences); });
     server.begin();
     Serial.println("Webserver gestartet");
@@ -85,6 +87,7 @@ void setup() {
 }
 
 void loop() {
+    int start = millis();
     // Sensordaten aktualisieren
     Wire.begin(21, 22); 
     temperature1 = sht20_1.temperature();
@@ -100,14 +103,16 @@ void loop() {
 
     // Uhrzeit aktualisieren
     updateTime(&settings, &preferences);
-    Serial.println("Temperatur 1: " + String(temperature1, 1) + " °C, Luftfeuchtigkeit 1: " + String(humidity1, 1) + " %");
-    Serial.println("Temperatur 2: " + String(settings.temperature2, 1) + " °C, Luftfeuchtigkeit 2: " + String(humidity2, 1) + " %");
+    //Serial.println("Temperatur 1: " + String(temperature1, 1) + " °C, Luftfeuchtigkeit 1: " + String(humidity1, 1) + " %");
+    //Serial.println("Temperatur 2: " + String(settings.temperature2, 1) + " °C, Luftfeuchtigkeit 2: " + String(humidity2, 1) + " %");
 
-    // Webserver anfragen bearbeiten
-    server.handleClient();
     // Aktualisiere den Lüfterstatus für alle vier Lüfter
     fanControl1->update();
     fanControl2->update();
     fanControl3->update();
     fanControl4->update();
+
+    // Webserver anfragen bearbeiten
+    server.handleClient();
+    Serial.println("Loop time: " + String(millis() - start) + " ms");
 }

@@ -16,10 +16,14 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "<div class='container'>";
     html += "<h1 class='text-center'>ESP32 Steuerung</h1>";
 
-    // Uhranzeige
-    html += "<h2>Aktuelle Uhrzeit</h2>";
-    html += "<div id='time' class='alert alert-info text-center'>Laden...</div>";
-    html += "<a href=\"/setTime\" class='btn btn-primary'>Uhrzeit einstellen</a>";
+    // Ausgabe der aktuellen Sensordaten
+    html += "<h2>Sensordaten</h2>";
+    html += "<div class='sensor-data'>";
+    html += "<strong>Temperatur 1:</strong> <span id='temperature1'>" + String(settings->temperature1, 1) + "</span> &deg;C<br>";
+    html += "<strong>Temperatur 2:</strong> <span id='temperature2'>" + String(settings->temperature2, 1) + "</span> &deg;C<br>";
+    html += "<strong>Luftfeuchtigkeit 1:</strong> <span id='humidity1'>" + String(settings->humidity1, 1) + "</span> %<br>";
+    html += "<strong>Luftfeuchtigkeit 2:</strong> <span id='humidity2'>" + String(settings->humidity2, 1) + "</span> %<br>";
+    html += "</div>";
 
     // Anzeige der aktuellen Lüfterlaufzeit und Zyklusanteil
     html += "<h2>Aktuelle Sollwerte</h2>";
@@ -44,14 +48,13 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "<a href=\"/set_values\" class='btn btn-secondary'>Sollwerte umstellen</a>";
     html += "</div>";
 
-    // Ausgabe der aktuellen Sensordaten
-    html += "<h2>Sensordaten</h2>";
-    html += "<div class='sensor-data'>";
-    html += "<strong>Temperatur 1:</strong> <span id='temperature1'>" + String(settings->temperature1, 1) + "</span> &deg;C<br>";
-    html += "<strong>Temperatur 2:</strong> <span id='temperature2'>" + String(settings->temperature2, 1) + "</span> &deg;C<br>";
-    html += "<strong>Luftfeuchtigkeit 1:</strong> <span id='humidity1'>" + String(settings->humidity1, 1) + "</span> %<br>";
-    html += "<strong>Luftfeuchtigkeit 2:</strong> <span id='humidity2'>" + String(settings->humidity2, 1) + "</span> %<br>";
-    html += "</div>";
+    // Uhranzeige basierend auf den Settings
+    html += "<h2>Aktuelle Uhrzeit</h2>";
+    String timeStr = String(settings->hours) + ":" + 
+                     (settings->minutes < 10 ? "0" : "") + String(settings->minutes) + ":" + 
+                     (settings->seconds < 10 ? "0" : "") + String(settings->seconds);
+    html += "<div id='time' class='alert alert-info text-center'>" + timeStr + "</div>";
+    html += "<a href=\"/setTime\" class='btn btn-primary'>Uhrzeit einstellen</a>";
 
     // AJAX zur dynamischen Aktualisierung
     html += "<script>";
@@ -60,7 +63,6 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "  xhr.onreadystatechange = function() {";
     html += "    if (xhr.readyState == 4 && xhr.status == 200) {";
     html += "      var data = JSON.parse(xhr.responseText);";
-    html += "      document.getElementById('time').innerHTML = data.time;";
     html += "      document.getElementById('onTime1').innerHTML = data.onTime1;";
     html += "      document.getElementById('onPercentage1').innerHTML = data.onPercentage1;";
     html += "      document.getElementById('onTime2').innerHTML = data.onTime2;";
@@ -74,12 +76,13 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "      document.getElementById('temperature2').innerHTML = data.temperature2;";
     html += "      document.getElementById('humidity1').innerHTML = data.humidity1;";
     html += "      document.getElementById('humidity2').innerHTML = data.humidity2;";
+    html += "      document.getElementById('time').innerHTML = data.hours + ':' + (data.minutes < 10 ? '0' : '') + data.minutes + ':' + (data.seconds < 10 ? '0' : '') + data.seconds;";
     html += "    }";
     html += "  };";
     html += "  xhr.open('GET', '/updateData', true);";
     html += "  xhr.send();";
     html += "}";
-    html += "setInterval(updateData, 5000);";  // Aktualisierung alle 5 Sekunden
+    html += "setInterval(updateData, 500);";  // Aktualisierung alle 5 Sekunden
     html += "</script>";
 
     html += "</div></body></html>";
