@@ -97,65 +97,6 @@ void loadSettings(Settings* settings, Preferences* preferences) {
     Serial.println("Werte geladen!");
 }
 
-// ### Root-Handler ###
-
-void handleRoot(Settings* settings, WebServer& server) {
-    String html = "<html><body>";
-    html += "<h1>ESP32 Steuerung</h1>";
-
-    // Uhranzeige
-    html += "<h2>Aktuelle Uhrzeit</h2>";
-    html += "<div id='time'>Laden...</div>";
-    html += "<a href=\"/setTime\"><button>Uhrzeit einstellen</button></a>";
-
-    // Anzeige der aktuellen Lüfterlaufzeit und Zyklusanteil
-    html += "<h2>Aktuelle Sollwerte</h2>";
-    html += "L&uuml;fter 1<br>";
-    html += "Aktive Laufzeit: " + String(settings->onTime1) + " Sekunden<br>";
-    html += "Zyklusanteil: " + String(settings->onPercentage1) + " %<br><br>";
-
-    html += "L&uuml;fter 2<br>";
-    html += "Aktive Laufzeit: " + String(settings->onTime2) + " Sekunden<br>";
-    html += "Zyklusanteil: " + String(settings->onPercentage2) + " %<br><br>";
-
-    html += "L&uuml;fter 3<br>";
-    html += "Aktive Laufzeit: " + String(settings->onTime3) + " Sekunden<br>";
-    html += "Zyklusanteil: " + String(settings->onPercentage3) + " %<br><br>";
-
-    html += "L&uuml;fter 4<br>";
-    html += "Aktive Laufzeit: " + String(settings->onTime4) + " Sekunden<br>";
-    html += "Zyklusanteil: " + String(settings->onPercentage4) + " %<br><br>";
-
-    html += "Soll-Temperatur: " + String(settings->targetTemperature, 1) + " &deg;C<br>";
-    html += "<a href=\"/set_values\"><button>Sollwerte umstellen</button></a>";
-
-    // Ausgabe der aktuellen Sensordaten
-    html += "<h2>Sensordaten</h2>";
-    html += "Temperatur 1: " + String(settings->temperature1, 1) + " &deg;C<br>";
-    html += "Temperatur 2: " + String(settings->temperature2, 1) + " &deg;C<br>";
-    html += "Luftfeuchtigkeit 1: " + String(settings->humidity1, 1) + " %<br>";
-    html += "Luftfeuchtigkeit 2: " + String(settings->humidity2, 1) + " %<br>";
-
-    html += "<script>";
-    html += "function updateClock() {";
-    html += "  var xhr = new XMLHttpRequest();";
-    html += "  xhr.onreadystatechange = function() {";
-    html += "    if (xhr.readyState == 4 && xhr.status == 200) {";
-    html += "      document.getElementById('time').innerHTML = xhr.responseText;";
-    html += "    }";
-    html += "  };";
-    html += "  xhr.open('GET', '/time', true);";
-    html += "  xhr.send();";
-    html += "}";
-    html += "setInterval(updateClock, 1000);";
-    html += "</script>";
-
-    html += "</body></html>";
-
-    server.send(200, "text/html", html);
-}
-
-
 // ### Set-Values-Handler ###
 
 void handleSetValuesPage(Settings* settings, WebServer& server) {

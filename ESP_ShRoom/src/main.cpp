@@ -6,6 +6,7 @@
 #include <WebServer.h>
 #include <Preferences.h>
 #include "web_handlers.h"
+#include "handle_root.h"
 
 // Sensor-Instanzen
 uFire_SHT20 sht20_1;  // Sensor 1 an Pin 21, 22

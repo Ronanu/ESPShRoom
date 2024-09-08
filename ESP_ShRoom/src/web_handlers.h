@@ -3,46 +3,8 @@
 
 #include <WebServer.h>
 #include <Preferences.h>
+#include "settings.h"
 
-struct Settings {
-    // FanControlSettings
-    bool isEnabled1 = true;
-    bool isEnabled2 = true;
-    bool isEnabled3 = true;
-    bool isEnabled4 = true;
-    int onTime1;
-    int onTime2;
-    int onTime3;
-    int onTime4;
-    int onPercentage1;
-    int onPercentage2;
-    int onPercentage3;
-    int onPercentage4;
-
-    // TemperatureControlSettings
-    float targetTemperature;
-
-    // to be removed
-    int fan1DutyCycle;
-    int fan2DutyCycle;
-    
-
-    // TimeSettings
-    int hours;
-    int minutes;
-    int seconds;
-
-    int lastSavedMinute;
-    int lastUpdateTime;
-
-    // SensorSettings
-    float temperature1;
-    float temperature2;
-    float humidity1;
-    float humidity2;
-};
-
-void handleRoot(Settings* settings, WebServer& server);
 void handleTime(Settings* settings, WebServer& server);
 void handleSetValuesPage(Settings* settings, WebServer& server);
 void handleSetValues(Settings* settings, WebServer& server, Preferences* preferences);
