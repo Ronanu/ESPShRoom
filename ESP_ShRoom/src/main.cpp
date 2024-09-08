@@ -18,7 +18,7 @@ float humidity1;
 float humidity2;
 
 // Globales Settings-Objekt
-Settings currentSettings;
+Settings settings;
 
 Preferences preferences;
 
@@ -27,8 +27,6 @@ const char* password = "12345678";
 
 WebServer server(80);
 
-// Eine Instanz der Settings
-Settings settings;
 
 // FanControl-Instanzen für vier Lüfter
 FanControl* fanControl1;
@@ -60,43 +58,23 @@ void setup() {
 
     // NVS Initialisierung und Werte laden
     preferences.begin("my-app", false);
-    loadSettings(&currentSettings, &preferences);
+    loadSettings(&settings, &preferences);
 
     // Webserver Routen
-    server.on("/", [&]() { handleRoot(&currentSettings, server); });
-    server.on("/time", [&]() { handleTime(&currentSettings, server); });
-    server.on("/setTime", [&]() { handleSetTimePage(&currentSettings, server); });
-    server.on("/updateTime", [&]() { handleSetTime(&currentSettings, server, &preferences); });
-    server.on("/set_values", [&]() { handleSetValuesPage(&currentSettings, server); });
-    server.on("/update_values", [&]() { handleSetValues(&currentSettings, server, &preferences); });
+    server.on("/", [&]() { handleRoot(&settings, server); });
+    server.on("/time", [&]() { handleTime(&settings, server); });
+    server.on("/setTime", [&]() { handleSetTimePage(&settings, server); });
+    server.on("/updateTime", [&]() { handleSetTime(&settings, server, &preferences); });
+    server.on("/set_values", [&]() { handleSetValuesPage(&settings, server); });
+    server.on("/update_values", [&]() { handleSetValues(&settings, server, &preferences); });
     server.begin();
     Serial.println("Webserver gestartet");
 
-    // Beispiel-Settings für Lüfter 1
-    settings.isEnabled1 = true;
-    settings.onTime1 = 1;         // 60 Sekunden Zykluszeit
-    settings.onPercentage1 = 50;   // 50% Einschaltdauer
-
-    // Beispiel-Settings für Lüfter 2
-    settings.isEnabled2 = true;
-    settings.onTime2 = 6;         // 60 Sekunden Zykluszeit
-    settings.onPercentage2 = 40;   // 40% Einschaltdauer
-
-    // Beispiel-Settings für Lüfter 3
-    settings.isEnabled3 = true;
-    settings.onTime3 = 5;         // 60 Sekunden Zykluszeit
-    settings.onPercentage3 = 60;   // 60% Einschaltdauer
-
-    // Beispiel-Settings für Lüfter 4
-    settings.isEnabled4 = true;
-    settings.onTime4 = 60;         // 60 Sekunden Zykluszeit
-    settings.onPercentage4 = 30;   // 30% Einschaltdauer
-
     // FanControl-Instanzen erstellen und initialisieren
-    fanControl1 = new FanControl(&settings.isEnabled1, &settings.onTime1, &settings.onPercentage1, 15);  // GPIO 25
-    fanControl2 = new FanControl(&settings.isEnabled2, &settings.onTime2, &settings.onPercentage2, 2);  // GPIO 26
-    fanControl3 = new FanControl(&settings.isEnabled3, &settings.onTime3, &settings.onPercentage3, 0);  // GPIO 27
-    fanControl4 = new FanControl(&settings.isEnabled4, &settings.onTime4, &settings.onPercentage4, 4);  // GPIO 14
+    fanControl1 = new FanControl(& settings.isEnabled1, & settings.onTime1, & settings.onPercentage1, 15);  // GPIO 25
+    fanControl2 = new FanControl(& settings.isEnabled2, & settings.onTime2, & settings.onPercentage2, 2);  // GPIO 26
+    fanControl3 = new FanControl(& settings.isEnabled3, & settings.onTime3, & settings.onPercentage3, 0);  // GPIO 27
+    fanControl4 = new FanControl(& settings.isEnabled4, & settings.onTime4, & settings.onPercentage4, 4);  // GPIO 14
 
     // Initialisierung der FanControl-Instanzen
     fanControl1->initialize();
@@ -114,15 +92,15 @@ void loop() {
     temperature2 = sht20_2.temperature();
     humidity2 = sht20_2.humidity();
 
-    currentSettings.temperature1 = temperature1;
-    currentSettings.temperature2 = temperature2;
-    currentSettings.humidity1 = humidity1;
-    currentSettings.humidity2 = humidity2;
+    settings.temperature1 = temperature1;
+    settings.temperature2 = temperature2;
+    settings.humidity1 = humidity1;
+    settings.humidity2 = humidity2;
 
     // Uhrzeit aktualisieren
-    updateTime(&currentSettings, &preferences);
+    updateTime(&settings, &preferences);
     Serial.println("Temperatur 1: " + String(temperature1, 1) + " °C, Luftfeuchtigkeit 1: " + String(humidity1, 1) + " %");
-    Serial.println("Temperatur 2: " + String(currentSettings.temperature2, 1) + " °C, Luftfeuchtigkeit 2: " + String(humidity2, 1) + " %");
+    Serial.println("Temperatur 2: " + String(settings.temperature2, 1) + " °C, Luftfeuchtigkeit 2: " + String(humidity2, 1) + " %");
 
     // Webserver anfragen bearbeiten
     server.handleClient();

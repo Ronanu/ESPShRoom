@@ -23,9 +23,8 @@ private:
 
     bool isFanOn;              // Zustand des Lüfters
     unsigned long lastSwitchTime;  // Zeitpunkt des letzten Zustandswechsels
-    unsigned long onTimeMillis;    // Gesamtdauer in Millisekunden
-    unsigned long onDurationMillis;// Berechnete Einschaltdauer in Millisekunden
-    unsigned long offDurationMillis;// Berechnete Ausschaltdauer in Millisekunden
+    int onTimeMillis;// Einschaltdauer in Millisekunden
+    int offTimeMillis;// Berechnete Ausschaltdauer in Millisekunden
 
     // Methode zur Steuerung des Lüfterstatus
     void switchFan(bool state);

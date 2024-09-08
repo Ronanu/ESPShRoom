@@ -6,10 +6,10 @@
 
 struct Settings {
     // FanControlSettings
-    bool isEnabled1;
-    bool isEnabled2;
-    bool isEnabled3;
-    bool isEnabled4;
+    bool isEnabled1 = true;
+    bool isEnabled2 = true;
+    bool isEnabled3 = true;
+    bool isEnabled4 = true;
     int onTime1;
     int onTime2;
     int onTime3;

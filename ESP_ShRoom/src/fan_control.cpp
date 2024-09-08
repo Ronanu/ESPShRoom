@@ -6,11 +6,11 @@ FanControl::FanControl(bool* enabledAddr, int* onTimeAddr, int* onPercentageAddr
     this->onTimeAddr = onTimeAddr;
     this->onPercentageAddr = onPercentageAddr;
     this->pin = pin;
+
     this->isFanOn = false; // Lüfter startet aus
     this->lastSwitchTime = 0; // Initialer Zeitpunkt
     this->onTimeMillis = 0;
-    this->onDurationMillis = 0;
-    this->offDurationMillis = 0;
+    this->offTimeMillis = 0;
     pinMode(pin, OUTPUT);
 }
 
@@ -34,13 +34,16 @@ void FanControl::update() {
         return;
     }
 
+    // Berechne die neuen Ein- und Ausschaltzeiten
+    calculateDurations();
+
     unsigned long currentTime = millis();
     
-    if (isFanOn && (currentTime - lastSwitchTime >= onDurationMillis)) {
+    if (isFanOn && (currentTime - lastSwitchTime >= onTimeMillis) && *onPercentageAddr < 100) {
         // Lüfter ausschalten, wenn die Einschaltdauer erreicht ist
         switchFan(false);
         lastSwitchTime = currentTime;  // Zeit für den nächsten Wechsel setzen
-    } else if (!isFanOn && (currentTime - lastSwitchTime >= offDurationMillis)) {
+    } else if (!isFanOn && (currentTime - lastSwitchTime >= offTimeMillis)) {
         // Lüfter einschalten, wenn die Pausenzeit erreicht ist
         switchFan(true);
         lastSwitchTime = currentTime;  // Zeit für den nächsten Wechsel setzen
@@ -50,12 +53,20 @@ void FanControl::update() {
 // Methode zum Umschalten des Lüfterstatus
 void FanControl::switchFan(bool state) {
     isFanOn = state;
-    digitalWrite(pin, state ? HIGH : LOW);  // Lüfter an oder aus
+    digitalWrite(pin, state ? LOW : HIGH);  // Lüfter an oder aus
 }
 
 // Berechnung der Ein- und Ausschaltdauer basierend auf der Gesamtdauer und der Einschaltdauer in Prozent
 void FanControl::calculateDurations() {
     onTimeMillis = (*onTimeAddr) * 1000;  // Gesamtdauer des Zyklus in Millisekunden
-    onDurationMillis = (onTimeMillis * (*onPercentageAddr)) / 100;  // Einschaltdauer basierend auf dem Prozentsatz
-    offDurationMillis = onTimeMillis - onDurationMillis;  // Pausenzeit ist der Rest der Zyklusdauer
+    if (*onPercentageAddr <= 0) {
+        *enabledAddr = false;  // Lüfter ausschalten, wenn der Prozentsatz 0 oder negativ ist
+    }
+    else {
+        *enabledAddr = true;  // Lüfter einschalten, wenn der Prozentsatz positiv ist
+        int total_period = 100 * onTimeMillis / *onPercentageAddr;  // Gesamtdauer des Zyklus
+        offTimeMillis = total_period - onTimeMillis;  // Pausenzeit ist der Rest der Zyklusdauer
+    }
+    //onTimeMillis = 1000;  // Einschaltdauer ist 1 Sekunde
+    //offTimeMillis = 100;  // Pausenzeit ist 1 Sekunde
 }

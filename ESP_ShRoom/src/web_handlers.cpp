@@ -1,6 +1,41 @@
 #include "web_handlers.h"
 #include <Arduino.h>
 
+// ### Clock-Handler ###
+
+void handleSetTimePage(Settings* settings, WebServer& server) {
+    String html = "<html><body>";
+    html += "<h1>Uhrzeit einstellen</h1>";
+    html += "<form action=\"/updateTime\" method=\"POST\">";
+    html += "Stunde: <input type=\"text\" name=\"hour\" value=\"" + String(settings->hours) + "\"><br>";
+    html += "Minute: <input type=\"text\" name=\"minute\" value=\"" + String(settings->minutes) + "\"><br>";
+    html += "<input type=\"submit\" value=\"Setze Uhrzeit\">";
+    html += "</form>";
+    html += "</body></html>";
+    server.send(200, "text/html", html);
+}
+
+void handleSetTime(Settings* settings, WebServer& server, Preferences* preferences) {
+    if (server.method() == HTTP_POST) {
+        settings->hours = server.arg("hour").toInt();
+        settings->minutes = server.arg("minute").toInt();
+        settings->seconds = 0; // Sekunden auf 0 setzen
+        settings->lastUpdateTime = millis(); // Startzeitpunkt speichern
+
+        // Speichere die neuen Uhrzeit-Werte sofort
+        saveCurrentSettings(settings, preferences);
+
+        server.sendHeader("Location", "/"); // Umleitung zur Root-Seite
+        server.send(303); // 303 Redirect
+    } else {
+        server.send(405, "text/html", "Methode nicht erlaubt!");
+    }
+}
+
+void handleTime(Settings* settings, WebServer& server) {
+    String time = String(settings->hours) + ":" + String(settings->minutes) + ":" + String(settings->seconds);
+    server.send(200, "text/plain", time);
+}
 
 void updateTime(Settings* settings, Preferences* preferences) {
     unsigned long currentMillis = millis();
@@ -25,9 +60,18 @@ void updateTime(Settings* settings, Preferences* preferences) {
     }
 }
 
+// ### saving Settings-Handler ###
 void saveCurrentSettings(Settings* settings, Preferences* preferences) {
-    preferences->putInt("fan1DutyCycle", settings->fan1DutyCycle);
-    preferences->putInt("fan2DutyCycle", settings->fan2DutyCycle);
+    preferences->putInt("onTime1", settings->onTime1);
+    preferences->putInt("onTime2", settings->onTime2);
+    preferences->putInt("onTime3", settings->onTime3);
+    preferences->putInt("onTime4", settings->onTime4);
+
+    preferences->putInt("onPercentage1", settings->onPercentage1);
+    preferences->putInt("onPercentage2", settings->onPercentage2);
+    preferences->putInt("onPercentage3", settings->onPercentage3);
+    preferences->putInt("onPercentage4", settings->onPercentage4);
+
     preferences->putFloat("targetTemperature", settings->targetTemperature);
     preferences->putInt("hours", settings->hours);
     preferences->putInt("minutes", settings->minutes);
@@ -35,8 +79,16 @@ void saveCurrentSettings(Settings* settings, Preferences* preferences) {
 }
 
 void loadSettings(Settings* settings, Preferences* preferences) {
-    settings->fan1DutyCycle = preferences->getInt("fan1DutyCycle", 50);
-    settings->fan2DutyCycle = preferences->getInt("fan2DutyCycle", 50);
+    settings->onTime1 = preferences->getInt("onTime1", 10);
+    settings->onTime2 = preferences->getInt("onTime2", 10);
+    settings->onTime3 = preferences->getInt("onTime3", 10);
+    settings->onTime4 = preferences->getInt("onTime4", 10);
+
+    settings->onPercentage1 = preferences->getInt("onPercentage1", 50);
+    settings->onPercentage2 = preferences->getInt("onPercentage2", 50);
+    settings->onPercentage3 = preferences->getInt("onPercentage3", 50);
+    settings->onPercentage4 = preferences->getInt("onPercentage4", 50);
+
     settings->targetTemperature = preferences->getFloat("targetTemperature", 22.0);
     settings->hours = preferences->getInt("hours", 0);
     settings->minutes = preferences->getInt("minutes", 0);
@@ -44,6 +96,8 @@ void loadSettings(Settings* settings, Preferences* preferences) {
     settings->lastSavedMinute = settings->minutes;  // Initialisiere die letzte gespeicherte Minute
     Serial.println("Werte geladen!");
 }
+
+// ### Root-Handler ###
 
 void handleRoot(Settings* settings, WebServer& server) {
     String html = "<html><body>";
@@ -56,8 +110,10 @@ void handleRoot(Settings* settings, WebServer& server) {
 
     // Anzeige der aktuellen Lüftereinschaltdauer und Soll-Temperatur
     html += "<h2>Aktuelle Sollwerte</h2>";
-    html += "Einschaltdauer L&uuml;fter 1: " + String(settings->fan1DutyCycle) + " %<br>";
-    html += "Einschaltdauer L&uuml;fter 2: " + String(settings->fan2DutyCycle) + " %<br>";
+    html += "L&uuml;fter 1 Einschaltdauer: " + String(settings->onTime1) + " s, Einschaltdauer Prozent: " + String(settings->onPercentage1) + " %<br>";
+    html += "L&uuml;fter 2 Einschaltdauer: " + String(settings->onTime2) + " s, Einschaltdauer Prozent: " + String(settings->onPercentage2) + " %<br>";
+    html += "L&uuml;fter 3 Einschaltdauer: " + String(settings->onTime3) + " s, Einschaltdauer Prozent: " + String(settings->onPercentage3) + " %<br>";
+    html += "L&uuml;fter 4 Einschaltdauer: " + String(settings->onTime4) + " s, Einschaltdauer Prozent: " + String(settings->onPercentage4) + " %<br>";
     html += "Soll-Temperatur: " + String(settings->targetTemperature, 1) + " &deg;C<br>";
     html += "<a href=\"/set_values\"><button>Sollwerte umstellen</button></a>";
 
@@ -87,21 +143,34 @@ void handleRoot(Settings* settings, WebServer& server) {
     server.send(200, "text/html", html);
 }
 
-void handleTime(Settings* settings, WebServer& server) {
-    String time = String(settings->hours) + ":" + String(settings->minutes) + ":" + String(settings->seconds);
-    server.send(200, "text/plain", time);
-}
+
+// ### Set-Values-Handler ###
 
 void handleSetValuesPage(Settings* settings, WebServer& server) {
     String html = "<html><body>";
     html += "<h1>Sollwerte umstellen</h1>";
     html += "<form action=\"/update_values\" method=\"POST\">";
 
-    // Eingabefelder für Lüftereinschaltdauer in Prozent
-    html += "Einschaltdauer L&uuml;fter 1 (in Prozent): ";
-    html += "<input type=\"number\" name=\"fan1\" value=\"" + String(settings->fan1DutyCycle) + "\" min=\"0\" max=\"100\"><br>";
-    html += "Einschaltdauer L&uuml;fter 2 (in Prozent): ";
-    html += "<input type=\"number\" name=\"fan2\" value=\"" + String(settings->fan2DutyCycle) + "\" min=\"0\" max=\"100\"><br>";
+    // Eingabefelder für Lüftereinschaltdauer in Sekunden und Prozentsatz
+    html += "L&uuml;fter 1 Einschaltdauer (in Sekunden): ";
+    html += "<input type=\"number\" name=\"onTime1\" value=\"" + String(settings->onTime1) + "\" min=\"0\"><br>";
+    html += "L&uuml;fter 1 Einschaltdauer (in Prozent): ";
+    html += "<input type=\"number\" name=\"onPercentage1\" value=\"" + String(settings->onPercentage1) + "\" min=\"0\" max=\"100\"><br>";
+
+    html += "L&uuml;fter 2 Einschaltdauer (in Sekunden): ";
+    html += "<input type=\"number\" name=\"onTime2\" value=\"" + String(settings->onTime2) + "\" min=\"0\"><br>";
+    html += "L&uuml;fter 2 Einschaltdauer (in Prozent): ";
+    html += "<input type=\"number\" name=\"onPercentage2\" value=\"" + String(settings->onPercentage2) + "\" min=\"0\" max=\"100\"><br>";
+
+    html += "L&uuml;fter 3 Einschaltdauer (in Sekunden): ";
+    html += "<input type=\"number\" name=\"onTime3\" value=\"" + String(settings->onTime3) + "\" min=\"0\"><br>";
+    html += "L&uuml;fter 3 Einschaltdauer (in Prozent): ";
+    html += "<input type=\"number\" name=\"onPercentage3\" value=\"" + String(settings->onPercentage3) + "\" min=\"0\" max=\"100\"><br>";
+
+    html += "L&uuml;fter 4 Einschaltdauer (in Sekunden): ";
+    html += "<input type=\"number\" name=\"onTime4\" value=\"" + String(settings->onTime4) + "\" min=\"0\"><br>";
+    html += "L&uuml;fter 4 Einschaltdauer (in Prozent): ";
+    html += "<input type=\"number\" name=\"onPercentage4\" value=\"" + String(settings->onPercentage4) + "\" min=\"0\" max=\"100\"><br>";
 
     // Eingabefeld für Soll-Temperatur
     html += "Soll-Temperatur (in &deg;C): ";
@@ -114,25 +183,37 @@ void handleSetValuesPage(Settings* settings, WebServer& server) {
     server.send(200, "text/html", html);
 }
 
-void handleSetTimePage(Settings* settings, WebServer& server) {
-    String html = "<html><body>";
-    html += "<h1>Uhrzeit einstellen</h1>";
-    html += "<form action=\"/updateTime\" method=\"POST\">";
-    html += "Stunde: <input type=\"text\" name=\"hour\" value=\"" + String(settings->hours) + "\"><br>";
-    html += "Minute: <input type=\"text\" name=\"minute\" value=\"" + String(settings->minutes) + "\"><br>";
-    html += "<input type=\"submit\" value=\"Setze Uhrzeit\">";
-    html += "</form>";
-    html += "</body></html>";
-    server.send(200, "text/html", html);
-}
-
 void handleSetValues(Settings* settings, WebServer& server, Preferences* preferences) {
-    if (server.hasArg("fan1")) {
-        settings->fan1DutyCycle = server.arg("fan1").toInt();
+    if (server.hasArg("onTime1")) {
+        settings->onTime1 = server.arg("onTime1").toInt();
     }
 
-    if (server.hasArg("fan2")) {
-        settings->fan2DutyCycle = server.arg("fan2").toInt();
+    if (server.hasArg("onTime2")) {
+        settings->onTime2 = server.arg("onTime2").toInt();
+    }
+
+    if (server.hasArg("onTime3")) {
+        settings->onTime3 = server.arg("onTime3").toInt();
+    }
+
+    if (server.hasArg("onTime4")) {
+        settings->onTime4 = server.arg("onTime4").toInt();
+    }
+
+    if (server.hasArg("onPercentage1")) {
+        settings->onPercentage1 = server.arg("onPercentage1").toInt();
+    }
+
+    if (server.hasArg("onPercentage2")) {
+        settings->onPercentage2 = server.arg("onPercentage2").toInt();
+    }
+
+    if (server.hasArg("onPercentage3")) {
+        settings->onPercentage3 = server.arg("onPercentage3").toInt();
+    }
+
+    if (server.hasArg("onPercentage4")) {
+        settings->onPercentage4 = server.arg("onPercentage4").toInt();
     }
 
     if (server.hasArg("targetTemp")) {
@@ -146,19 +227,3 @@ void handleSetValues(Settings* settings, WebServer& server, Preferences* prefere
     server.send(303); // 303 Redirect
 }
 
-void handleSetTime(Settings* settings, WebServer& server, Preferences* preferences) {
-    if (server.method() == HTTP_POST) {
-        settings->hours = server.arg("hour").toInt();
-        settings->minutes = server.arg("minute").toInt();
-        settings->seconds = 0; // Sekunden auf 0 setzen
-        settings->lastUpdateTime = millis(); // Startzeitpunkt speichern
-
-        // Speichere die neuen Uhrzeit-Werte sofort
-        saveCurrentSettings(settings, preferences);
-
-        server.sendHeader("Location", "/"); // Umleitung zur Root-Seite
-        server.send(303); // 303 Redirect
-    } else {
-        server.send(405, "text/html", "Methode nicht erlaubt!");
-    }
-}
