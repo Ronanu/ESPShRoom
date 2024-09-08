@@ -74,10 +74,10 @@ void setup() {
     Serial.println("Webserver gestartet");
 
     // FanControl-Instanzen erstellen und initialisieren
-    fanControl1 = new FanControl(& settings.isEnabled1, & settings.onTime1, & settings.onPercentage1, 15);  // GPIO 25
-    fanControl2 = new FanControl(& settings.isEnabled2, & settings.onTime2, & settings.onPercentage2, 2);  // GPIO 26
-    fanControl3 = new FanControl(& settings.isEnabled3, & settings.onTime3, & settings.onPercentage3, 0);  // GPIO 27
-    fanControl4 = new FanControl(& settings.isEnabled4, & settings.onTime4, & settings.onPercentage4, 4);  // GPIO 14
+    fanControl1 = new FanControl(& settings.isEnabled1, & settings.onTime1, & settings.onPercentage1, 15);  // GPIO 15
+    fanControl2 = new FanControl(& settings.isEnabled2, & settings.onTime2, & settings.onPercentage2, 2);  // GPIO 2
+    fanControl3 = new FanControl(& settings.isEnabled3, & settings.onTime3, & settings.onPercentage3, 0);  // GPIO 0
+    fanControl4 = new FanControl(& settings.isEnabled4, & settings.onTime4, & settings.onPercentage4, 4);  // GPIO 4
 
     // Initialisierung der FanControl-Instanzen
     fanControl1->initialize();

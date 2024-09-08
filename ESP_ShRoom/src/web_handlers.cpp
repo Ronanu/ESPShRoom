@@ -2,16 +2,19 @@
 #include <Arduino.h>
 
 // ### Clock-Handler ###
-
 void handleSetTimePage(Settings* settings, WebServer& server) {
     String html = "<html><body>";
     html += "<h1>Uhrzeit einstellen</h1>";
     html += "<form action=\"/updateTime\" method=\"POST\">";
-    html += "Stunde: <input type=\"text\" name=\"hour\" value=\"" + String(settings->hours) + "\"><br>";
-    html += "Minute: <input type=\"text\" name=\"minute\" value=\"" + String(settings->minutes) + "\"><br>";
+
+    // Eingabefelder für die Uhrzeit
+    html += "Stunde: <input type=\"number\" name=\"hour\" value=\"" + String(settings->hours) + "\" min=\"0\" max=\"23\"><br>";
+    html += "Minute: <input type=\"number\" name=\"minute\" value=\"" + String(settings->minutes) + "\" min=\"0\" max=\"59\"><br>";
+
     html += "<input type=\"submit\" value=\"Setze Uhrzeit\">";
     html += "</form>";
     html += "</body></html>";
+    
     server.send(200, "text/html", html);
 }
 
@@ -104,30 +107,30 @@ void handleSetValuesPage(Settings* settings, WebServer& server) {
     html += "<h1>Sollwerte umstellen</h1>";
     html += "<form action=\"/update_values\" method=\"POST\">";
 
-    // Eingabefelder für Lüftereinschaltdauer in Sekunden und Prozentsatz
-    html += "L&uuml;fter 1 Einschaltdauer (in Sekunden): ";
+    // Eingabefelder für Lüfter aktive Laufzeit und Zyklusanteil
+    html += "L&uuml;fter 1 Aktive Laufzeit (in Sekunden): ";
     html += "<input type=\"number\" name=\"onTime1\" value=\"" + String(settings->onTime1) + "\" min=\"0\"><br>";
-    html += "L&uuml;fter 1 Einschaltdauer (in Prozent): ";
+    html += "L&uuml;fter 1 Zyklusanteil (in Prozent): ";
     html += "<input type=\"number\" name=\"onPercentage1\" value=\"" + String(settings->onPercentage1) + "\" min=\"0\" max=\"100\"><br>";
 
-    html += "L&uuml;fter 2 Einschaltdauer (in Sekunden): ";
+    html += "L&uuml;fter 2 Aktive Laufzeit (in Sekunden): ";
     html += "<input type=\"number\" name=\"onTime2\" value=\"" + String(settings->onTime2) + "\" min=\"0\"><br>";
-    html += "L&uuml;fter 2 Einschaltdauer (in Prozent): ";
+    html += "L&uuml;fter 2 Zyklusanteil (in Prozent): ";
     html += "<input type=\"number\" name=\"onPercentage2\" value=\"" + String(settings->onPercentage2) + "\" min=\"0\" max=\"100\"><br>";
 
-    html += "L&uuml;fter 3 Einschaltdauer (in Sekunden): ";
+    html += "L&uuml;fter 3 Aktive Laufzeit (in Sekunden): ";
     html += "<input type=\"number\" name=\"onTime3\" value=\"" + String(settings->onTime3) + "\" min=\"0\"><br>";
-    html += "L&uuml;fter 3 Einschaltdauer (in Prozent): ";
+    html += "L&uuml;fter 3 Zyklusanteil (in Prozent): ";
     html += "<input type=\"number\" name=\"onPercentage3\" value=\"" + String(settings->onPercentage3) + "\" min=\"0\" max=\"100\"><br>";
 
-    html += "L&uuml;fter 4 Einschaltdauer (in Sekunden): ";
+    html += "L&uuml;fter 4 Aktive Laufzeit (in Sekunden): ";
     html += "<input type=\"number\" name=\"onTime4\" value=\"" + String(settings->onTime4) + "\" min=\"0\"><br>";
-    html += "L&uuml;fter 4 Einschaltdauer (in Prozent): ";
+    html += "L&uuml;fter 4 Zyklusanteil (in Prozent): ";
     html += "<input type=\"number\" name=\"onPercentage4\" value=\"" + String(settings->onPercentage4) + "\" min=\"0\" max=\"100\"><br>";
 
     // Eingabefeld für Soll-Temperatur
     html += "Soll-Temperatur (in &deg;C): ";
-    html += "<input type=\"number\" name=\"targetTemp\" value=\"" + String(settings->targetTemperature) + "\" step=\"0.1\"><br>";
+    html += "<input type=\"number\" name=\"targetTemp\" value=\"" + String(settings->targetTemperature, 1) + "\" step=\"0.1\"><br>";
 
     html += "<input type=\"submit\" value=\"Werte setzen\">";
     html += "</form>";
