@@ -5,10 +5,29 @@
 #include <Preferences.h>
 
 struct Settings {
-    int fan1DutyCycle;
-    int fan2DutyCycle;
+    // FanControlSettings
+    bool isEnabled1;
+    bool isEnabled2;
+    bool isEnabled3;
+    bool isEnabled4;
+    int onTime1;
+    int onTime2;
+    int onTime3;
+    int onTime4;
+    int onPercentage1;
+    int onPercentage2;
+    int onPercentage3;
+    int onPercentage4;
+
+    // TemperatureControlSettings
     float targetTemperature;
 
+    // to be removed
+    int fan1DutyCycle;
+    int fan2DutyCycle;
+    
+
+    // TimeSettings
     int hours;
     int minutes;
     int seconds;
@@ -16,6 +35,7 @@ struct Settings {
     int lastSavedMinute;
     int lastUpdateTime;
 
+    // SensorSettings
     float temperature1;
     float temperature2;
     float humidity1;
