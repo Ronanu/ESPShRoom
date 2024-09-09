@@ -39,17 +39,23 @@ void setup() {
     Serial.begin(115200);
 
     // Initialisierung der Sensoren
-    Wire.begin(22, 21, 9600);  // SDA, SCL für Sensor 1
-    if (!sht20_1.begin()) {
+  Wire.begin(21, 22);  // SDA, SCL für Sensor 1
+
+    for (int i = 0; i < 5 && !sht20_1.begin(); i++) {
         Serial.println("Sensor 1 nicht gefunden, überprüfe die Verkabelung!");
-        //while (1);
+        delay(500);  // Warte eine halbe Sekunde
     }
 
-    Wire.begin(18, 19);  // SDA, SCL für Sensor 2
-    if (!sht20_2.begin()) {
-        Serial.println("Sensor 2 nicht gefunden, überprüfe die Verkabelung!");
-        //while (1);
+    if (!sht20_1.begin()) {
+        Serial.println("Maximale Anzahl von Versuchen erreicht, Sensor 1 konnte nicht verbunden werden.");
+        // while(1);  // Optional, falls du das Programm anhalten möchtest
     }
+
+    //Wire.begin(18, 19);  // SDA, SCL für Sensor 2
+    //if (!sht20_2.begin()) {
+    //    Serial.println("Sensor 2 nicht gefunden, überprüfe die Verkabelung!");
+    //    //while (1);
+    //}
 
     // Konfiguration des ESP32 als Access Point
     WiFi.softAP(ssid, password);
@@ -89,7 +95,6 @@ void setup() {
 void loop() {
     int start = millis();
     //Sensordaten aktualisieren
-    Wire.begin(21, 22); 
     temperature1 = sht20_1.temperature();
     humidity1 = sht20_1.humidity();
     //Wire.begin(18, 19);  // Wechsel zu Sensor 2
