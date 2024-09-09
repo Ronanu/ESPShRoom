@@ -1,39 +1,35 @@
+#include <Arduino.h>
+#include <Wire.h>
 #include "SHT20Sensor.h"
 
-// Instanz für Sensor 1 mit Standard-I²C-Bus
-SHT20Sensor sensor1(22, 21, Wire);
-
-// Instanz für Sensor 2 mit zweitem I²C-Bus (Wire1)
-SHT20Sensor sensor2(18, 19, Wire1);
+// Sensor-Instanz
+SHT20Sensor sensor1(21, 22, Wire);  // Sensor 1 an Pin 21 (SDA) und 22 (SCL)
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(115200);
 
+    // Initialisierung des Sensors
     if (!sensor1.begin()) {
-        Serial.println("Sensor 1 konnte nicht verbunden werden.");
-    }
-
-    if (!sensor2.begin()) {
-        Serial.println("Sensor 2 konnte nicht verbunden werden.");
+        Serial.println("Maximale Anzahl von Versuchen erreicht, Sensor 1 konnte nicht verbunden werden.");
+    } else {
+        Serial.println("Sensor 1 erfolgreich initialisiert.");
     }
 }
 
 void loop() {
-    float temperature1 = sensor1.getTemperature();
-    float humidity1 = sensor1.getHumidity();
+    // Sensordaten abrufen
+    float temperature = sensor1.getTemperature();
+    float humidity = sensor1.getHumidity();
 
-    float temperature2 = sensor2.getTemperature();
-    float humidity2 = sensor2.getHumidity();
+    // Sensordaten auf der Konsole ausgeben
+    Serial.print("Temperatur: ");
+    Serial.print(temperature, 1);
+    Serial.println(" °C");
 
-    Serial.print("Sensor 1 - Temperatur: ");
-    Serial.println(temperature1);
-    Serial.print("Sensor 1 - Luftfeuchtigkeit: ");
-    Serial.println(humidity1);
+    Serial.print("Luftfeuchtigkeit: ");
+    Serial.print(humidity, 1);
+    Serial.println(" %");
 
-    Serial.print("Sensor 2 - Temperatur: ");
-    Serial.println(temperature2);
-    Serial.print("Sensor 2 - Luftfeuchtigkeit: ");
-    Serial.println(humidity2);
-
-    delay(1000);  // Warte 1 Sekunde
+    // Eine Sekunde warten
+    delay(1000);
 }
