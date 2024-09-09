@@ -39,16 +39,16 @@ void setup() {
     Serial.begin(115200);
 
     // Initialisierung der Sensoren
-    Wire.begin(21, 22);  // SDA, SCL für Sensor 1
+    Wire.begin(22, 21, 9600);  // SDA, SCL für Sensor 1
     if (!sht20_1.begin()) {
         Serial.println("Sensor 1 nicht gefunden, überprüfe die Verkabelung!");
-        while (1);
+        //while (1);
     }
 
     Wire.begin(18, 19);  // SDA, SCL für Sensor 2
     if (!sht20_2.begin()) {
         Serial.println("Sensor 2 nicht gefunden, überprüfe die Verkabelung!");
-        while (1);
+        //while (1);
     }
 
     // Konfiguration des ESP32 als Access Point
@@ -74,10 +74,10 @@ void setup() {
     Serial.println("Webserver gestartet");
 
     // FanControl-Instanzen erstellen und initialisieren
-    fanControl1 = new FanControl(& settings.isEnabled1, & settings.onTime1, & settings.onPercentage1, 15);  // GPIO 15
-    fanControl2 = new FanControl(& settings.isEnabled2, & settings.onTime2, & settings.onPercentage2, 2);  // GPIO 2
-    fanControl3 = new FanControl(& settings.isEnabled3, & settings.onTime3, & settings.onPercentage3, 0);  // GPIO 0
-    fanControl4 = new FanControl(& settings.isEnabled4, & settings.onTime4, & settings.onPercentage4, 4);  // GPIO 4
+    fanControl1 = new FanControl(& settings.isEnabled1, & settings.onTime1, & settings.onPercentage1, 25);  // GPIO 15
+    fanControl2 = new FanControl(& settings.isEnabled2, & settings.onTime2, & settings.onPercentage2, 17);  // GPIO 2
+    fanControl3 = new FanControl(& settings.isEnabled3, & settings.onTime3, & settings.onPercentage3, 32);  // GPIO 0
+    fanControl4 = new FanControl(& settings.isEnabled4, & settings.onTime4, & settings.onPercentage4, 33);  // GPIO 4
 
     // Initialisierung der FanControl-Instanzen
     fanControl1->initialize();
@@ -88,13 +88,13 @@ void setup() {
 
 void loop() {
     int start = millis();
-    // Sensordaten aktualisieren
+    //Sensordaten aktualisieren
     Wire.begin(21, 22); 
     temperature1 = sht20_1.temperature();
     humidity1 = sht20_1.humidity();
-    Wire.begin(18, 19);  // Wechsel zu Sensor 2
-    temperature2 = sht20_2.temperature();
-    humidity2 = sht20_2.humidity();
+    //Wire.begin(18, 19);  // Wechsel zu Sensor 2
+    //temperature2 = sht20_2.temperature();
+    //humidity2 = sht20_2.humidity();
 
     settings.temperature1 = temperature1;
     settings.temperature2 = temperature2;
@@ -103,8 +103,8 @@ void loop() {
 
     // Uhrzeit aktualisieren
     updateTime(&settings, &preferences);
-    //Serial.println("Temperatur 1: " + String(temperature1, 1) + " °C, Luftfeuchtigkeit 1: " + String(humidity1, 1) + " %");
-    //Serial.println("Temperatur 2: " + String(settings.temperature2, 1) + " °C, Luftfeuchtigkeit 2: " + String(humidity2, 1) + " %");
+    Serial.println("Temperatur 1: " + String(temperature1, 1) + " °C, Luftfeuchtigkeit 1: " + String(humidity1, 1) + " %");
+    Serial.println("Temperatur 2: " + String(settings.temperature2, 1) + " °C, Luftfeuchtigkeit 2: " + String(humidity2, 1) + " %");
 
     // Aktualisiere den Lüfterstatus für alle vier Lüfter
     fanControl1->update();
