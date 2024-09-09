@@ -2,7 +2,7 @@
 #include <Wire.h>
 #include "SHT20Sensor.h"
 
-// Sensor-Instanz
+// Sensor-Instanz 21, 22 ; 18, 19
 SHT20Sensor sensor1(21, 22, Wire);  // Sensor 1 an Pin 21 (SDA) und 22 (SCL)
 
 void setup() {
