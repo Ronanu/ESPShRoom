@@ -38,6 +38,14 @@ struct Settings {
     float humidity2;
 };
 
+struct SensorData {
+    float temperature1;
+    float temperature2;
+    float humidity1;
+    float humidity2;
+};
+
+
 void printSettings(const Settings& settings);
 void saveCurrentSettings(Settings settings, Preferences* preferences);
 void loadSettings(Settings* settings, Preferences* preferences);

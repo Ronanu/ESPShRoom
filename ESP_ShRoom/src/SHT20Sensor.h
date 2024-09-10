@@ -18,6 +18,8 @@ public:
     float getHumidity();
 
 private:
+    float temperature = -1;
+    float humidity = -1;
     uint8_t _sdaPin;
     uint8_t _sclPin;
     TwoWire &_wireBus;  // Referenz auf den I²C-Bus
