@@ -16,7 +16,6 @@ SHT20Sensor sht20_1(18, 19, Wire);  // Sensor 1 an Pin 18, 19
 
 // Globales Settings-Objekt
 Settings settings;
-
 // Preferences-Objekt, das abgespeichert wird
 Preferences preferences;
 
@@ -32,14 +31,20 @@ FanControl* fanControl2;
 FanControl* fanControl3;
 FanControl* fanControl4;
 
-TemperatureController tempcontr1(& settings.targetTemperature, & settings.hysteresis, & settings.isEnabled3);
+TemperatureController tempcontr1(& settings.targetTemperature, & settings.hysteresis);
 
 
 
 
 
 void setup() {
+    // NVS Initialisierung und Werte laden
+    preferences.begin("my-app", false);
+    loadSettings(& settings, & preferences);
+
     Serial.begin(115200);
+
+    settings.crashcounter++;
 
     // Initialisierung der Sensoren
     if (!sht20_1.begin()) {
@@ -59,9 +64,6 @@ void setup() {
     Serial.print("IP-Adresse: ");
     Serial.println(WiFi.softAPIP());
 
-    // NVS Initialisierung und Werte laden
-    preferences.begin("my-app", false);
-    loadSettings(&settings, &preferences);
 
     server.on("/", [&]() { handleRoot(&settings, server); });
     server.on("/setTime", [&]() { handleSetTimePage(&settings, server); });
@@ -87,15 +89,18 @@ void setup() {
 }
 
 void loop() {
-    int start = millis();
+    unsigned long start = millis();
     //Sensordaten aktualisieren
     settings.temperature1 = sht20_1.getTemperature();
     //settings.temperature2 = sht20_2.getTemperature();
     settings.humidity1 = sht20_1.getHumidity();
     //settings.humidity2 = sht20_2.getHumidity();
-    tempcontr1.update(settings.temperature1);
+
     // Uhrzeit aktualisieren
     updateTime(&settings, &preferences);    
+
+    settings.isEnabled3 = tempcontr1.update(settings. isEnabled3, settings.temperature1);
+    
     // Webserver anfragen bearbeiten
     server.handleClient();
 
@@ -106,5 +111,6 @@ void loop() {
     fanControl4->update();
 
     Serial.println("\n\n\nLoop time: " + String(millis() - start) + " ms");
+    //saveCurrentSettings(settings, & preferences);
     printSettings(settings);
 }

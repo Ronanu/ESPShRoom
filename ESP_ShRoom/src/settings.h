@@ -1,13 +1,14 @@
 #ifndef SETTINGS_H  // Überprüft, ob SETTINGS_H noch nicht definiert ist
 #define SETTINGS_H  // Definiert SETTINGS_H, damit die Datei nur einmal eingebunden wird
 
+#include <Preferences.h>
 
 struct Settings {
     // FanControlSettings
-    bool isEnabled1 = true;
-    bool isEnabled2 = true;
-    bool isEnabled3 = true;
-    bool isEnabled4 = true;
+    bool isEnabled1 = false;
+    bool isEnabled2 = false;
+    bool isEnabled3 = false;
+    bool isEnabled4 = false;
     int onTime1;
     int onTime2;
     int onTime3;
@@ -38,5 +39,6 @@ struct Settings {
 };
 
 void printSettings(const Settings& settings);
-
+void saveCurrentSettings(Settings settings, Preferences* preferences);
+void loadSettings(Settings* settings, Preferences* preferences);
 #endif  // Beendet den Include-Guard

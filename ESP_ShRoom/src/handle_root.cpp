@@ -17,22 +17,24 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "<div class='container'>";
     
     // Überschrift: Sensordaten
-    html += "<h1 class='text-center'>Sensordaten</h1>";
+    html += "<h1 class='text-center'>ShRoom</h1>";
 
     // Ausgabe der Runtime direkt nach der Überschrift
-    html += "<div class='runtime'>Laufzeit: <span id='lastUpdateTime'>" + String(settings->lastUpdateTime) + "</span> ms</div><br>";  // ID für lastUpdateTime bleibt unverändert
+    html += "<div class='runtime'>Laufzeit: <span id='lastUpdateTime'>" + String(settings->lastUpdateTime) + "</span> ms<br>";  // ID für lastUpdateTime bleibt unverändert
+    html += "<span id = 'crashcounter'>Crashcounter: " + String(settings->crashcounter) + "</span></div><br>";  // ID für crashcounter bleibt unverändert
 
     // Ausgabe der aktuellen Sensordaten
+    html += "<div class='sensor-data'>";
     html += "<h3>Sensordaten</h3>";
-    html += "<strong>Temperatur 1:</strong> <span id='temperature1'>" + String(settings->temperature1, 3) + "</span> &deg;C<br>";  // Temperatur ID
-    html += "<strong>Luftfeuchtigkeit 1:</strong> <span id='humidity1'>" + String(settings->humidity1, 3) + "</span> %<br>";  // Luftfeuchtigkeit ID
+    html += "<strong>Temperatur 1: </strong> <span id='temperature1'>" + String(settings->temperature1, 3) + "</span> &deg;C<br>";  // Temperatur ID
+    html += "<strong>Luftfeuchtigkeit 1: </strong> <span id='humidity1'>" + String(settings->humidity1, 3) + "</span> %<br>";  // Luftfeuchtigkeit ID
     html += "</div>";
 
     // Überschrift: Sollzustände
-    html += "<h2>Sollzustände</h2>";
     html += "<div class='soll-data'>";
-    html += "<strong>Soll-Temperatur:</strong> <span id='targetTemperature'>" + String(settings->targetTemperature, 1) + "</span> &deg;C<br>";
-    html += "<strong>Hysterese:</strong> <span id='hysteresis'>" + String(settings->hysteresis, 2) + "</span> &deg;C<br><br>";  // Hysterese fett
+    html += "<h3>Sollzustände</h3>";
+    html += "<strong>Soll-Temperatur:\t</strong> <span id='targetTemperature'>" + String(settings->targetTemperature, 1) + "</span> &deg;C<br>";
+    html += "<strong>Hysterese:\t</strong> <span id='hysteresis'>" + String(settings->hysteresis, 2) + "</span> &deg;C<br><br>";  // Hysterese fett
     html += "<a href=\"/set_values\" class='btn btn-secondary'>Einstellungen</a><br><br>";  // Button für Einstellungen unter Temperaturregler
 
     // Überschrift: Aktoreinstellungen

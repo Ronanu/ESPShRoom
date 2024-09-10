@@ -5,10 +5,10 @@
 class TemperatureController {
 public:
     // Konstruktor, der die Adressen für Zieltemperatur, Hysterese und Heizungsstatus übergibt
-    TemperatureController(float* targetTemperature, float* hysteresis, bool* heatingEnabled);
+    TemperatureController(float* targetTemperature, float* hysteresis);
 
     // Methode zum Aktualisieren des Heizungsstatus basierend auf der aktuellen Temperatur
-    void update(float currentTemperature);
+    bool update(bool currentState, float currentTemperature);
 
 private:
     float* targetTemperature_;  // Zeiger auf die Zieltemperatur

@@ -3,10 +3,10 @@
 
 void printSettings(const Settings& settings) {
     Serial.println("=== FanControlSettings ===");
-    Serial.print("isEnabled1: "); Serial.println(settings.isEnabled1 ? "true" : "false");
-    Serial.print("isEnabled2: "); Serial.println(settings.isEnabled2 ? "true" : "false");
-    Serial.print("isEnabled3: "); Serial.println(settings.isEnabled3 ? "true" : "false");
-    Serial.print("isEnabled4: "); Serial.println(settings.isEnabled4 ? "true" : "false");
+    Serial.print("isEnabled1: "); Serial.println(settings.isEnabled1);
+    Serial.print("isEnabled2: "); Serial.println(settings.isEnabled2);
+    Serial.print("isEnabled3: "); Serial.println(settings.isEnabled3);
+    Serial.print("isEnabled4: "); Serial.println(settings.isEnabled4);
 
     Serial.print("onTime1: "); Serial.println(settings.onTime1);
     Serial.print("onTime2: "); Serial.println(settings.onTime2);
@@ -35,4 +35,48 @@ void printSettings(const Settings& settings) {
 
     Serial.print("lastUpdateTime: "); Serial.println(settings.lastUpdateTime);
     Serial.print("crashcounter: "); Serial.println(settings.crashcounter);
+}
+
+// ### saving Settings-Handler ###
+void saveCurrentSettings(Settings settings, Preferences* preferences) {
+    preferences->putInt("onTime1", settings.onTime1);
+    preferences->putInt("onTime2", settings.onTime2);
+    preferences->putInt("onTime3", settings.onTime3);
+    preferences->putInt("onTime4", settings.onTime4);
+
+    preferences->putInt("onPercentage1", settings.onPercentage1);
+    preferences->putInt("onPercentage2", settings.onPercentage2);
+    preferences->putInt("onPercentage3", settings.onPercentage3);
+    preferences->putInt("onPercentage4", settings.onPercentage4);
+
+    preferences->putFloat("targetTemp", settings.targetTemperature);
+    preferences->putFloat("hysteresis", settings.hysteresis);
+    preferences->putInt("hours", settings.hours);
+    preferences->putInt("minutes", settings.minutes);
+    preferences->putInt("seconds", settings.seconds);
+    preferences->putInt("crashcounter", settings.crashcounter);
+    Serial.println("Werte gespeichert!");
+}
+
+void loadSettings(Settings* settings, Preferences* preferences) {
+    settings->onTime1 = preferences->getInt("onTime1", 10);
+    settings->onTime2 = preferences->getInt("onTime2", 10);
+    settings->onTime3 = preferences->getInt("onTime3", 10);
+    settings->onTime4 = preferences->getInt("onTime4", 10);
+
+    settings->onPercentage1 = preferences->getInt("onPercentage1", 0);
+    settings->onPercentage2 = preferences->getInt("onPercentage2", 0);
+    settings->onPercentage3 = preferences->getInt("onPercentage3", 0);
+    settings->onPercentage4 = preferences->getInt("onPercentage4", 0);
+
+    settings->targetTemperature = preferences->getFloat("targetTemp", 22.0);
+    settings->hysteresis = preferences->getFloat("hysteresis", 0.5);
+
+    settings->hours = preferences->getInt("hours", 0);
+    settings->minutes = preferences->getInt("minutes", 0);
+    settings->seconds = preferences->getInt("seconds", 0);
+
+    settings->crashcounter = preferences->getInt("crashcounter", -1);
+
+    Serial.println("Werte geladen!");
 }

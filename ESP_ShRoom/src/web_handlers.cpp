@@ -24,10 +24,6 @@ void handleSetTime(Settings* settings, WebServer& server, Preferences* preferenc
         settings->minutes = server.arg("minute").toInt();
         settings->seconds = 0; // Sekunden auf 0 setzen
         
-
-        // Speichere die neuen Uhrzeit-Werte sofort
-        saveCurrentSettings(settings, preferences);
-
         server.sendHeader("Location", "/"); // Umleitung zur Root-Seite
         server.send(303); // 303 Redirect
     } else {
@@ -42,12 +38,12 @@ void updateTime(Settings* settings, Preferences* preferences) {
     // Modulo-Operator, um zu prüfen, ob eine Sekunde vergangen ist
     if (currentMillis - settings->lastUpdateTime >= 1000) { 
         settings->seconds++;
+        settings->lastUpdateTime = currentMillis;
+        saveCurrentSettings(*settings, preferences);
 
         if (settings->seconds >= 60) {
             settings->seconds = 0;
-            settings->minutes++;
-            // Werte speichern, wenn sich die Minute ändert
-            saveCurrentSettings(settings, preferences);
+            settings->minutes++;            
 
             if (settings->minutes >= 60) {
                 settings->minutes = 0;
@@ -59,51 +55,11 @@ void updateTime(Settings* settings, Preferences* preferences) {
             }
         }
     }
+    
 }
 
-// ### saving Settings-Handler ###
-void saveCurrentSettings(Settings* settings, Preferences* preferences) {
-    preferences->putInt("onTime1", settings->onTime1);
-    preferences->putInt("onTime2", settings->onTime2);
-    preferences->putInt("onTime3", settings->onTime3);
-    preferences->putInt("onTime4", settings->onTime4);
 
-    preferences->putInt("onPercentage1", settings->onPercentage1);
-    preferences->putInt("onPercentage2", settings->onPercentage2);
-    preferences->putInt("onPercentage3", settings->onPercentage3);
-    preferences->putInt("onPercentage4", settings->onPercentage4);
 
-    preferences->putFloat("targetTemp", settings->targetTemperature);
-    preferences->putFloat("hysteresis", settings->hysteresis);
-    preferences->putInt("hours", settings->hours);
-    preferences->putInt("minutes", settings->minutes);
-    preferences->putInt("seconds", settings->seconds);
-    preferences->putInt("crashcounter", settings->crashcounter);
-    Serial.println("Werte gespeichert!");
-}
-
-void loadSettings(Settings* settings, Preferences* preferences) {
-    settings->onTime1 = preferences->getInt("onTime1", 10);
-    settings->onTime2 = preferences->getInt("onTime2", 10);
-    settings->onTime3 = preferences->getInt("onTime3", 10);
-    settings->onTime4 = preferences->getInt("onTime4", 10);
-
-    settings->onPercentage1 = preferences->getInt("onPercentage1", 0);
-    settings->onPercentage2 = preferences->getInt("onPercentage2", 0);
-    settings->onPercentage3 = preferences->getInt("onPercentage3", 0);
-    settings->onPercentage4 = preferences->getInt("onPercentage4", 0);
-
-    settings->targetTemperature = preferences->getFloat("targetTemp", 22.0);
-    settings->hysteresis = preferences->getFloat("hysteresis", 0.5);
-
-    settings->hours = preferences->getInt("hours", 0);
-    settings->minutes = preferences->getInt("minutes", 0);
-    settings->seconds = preferences->getInt("seconds", 0);
-
-    settings->crashcounter = preferences->getInt("crashcounter", 0);
-
-    Serial.println("Werte geladen!");
-}
 
 // ### Set-Values-Handler ###
 
@@ -118,10 +74,6 @@ void handleSetValuesPage(Settings* settings, WebServer& server) {
     html += "<input type=\"number\" name=\"targetTemp\" value=\"" + String(settings->targetTemperature, 1) + "\" step=\"0.1\"><br><br>";
     html += "Hysterese (in &deg;C): ";
     html += "<input type=\"number\" name=\"hysteresis\" value=\"" + String(settings->hysteresis, 2) + "\" step=\"0.1\"><br><br>";
-
-    html += "<input type=\"submit\" value=\"Werte setzen\">";
-    html += "</form>";
-    html += "</body></html>";
 
     // Aktoren
 
@@ -154,6 +106,11 @@ void handleSetValuesPage(Settings* settings, WebServer& server) {
     html += "<input type=\"number\" name=\"onTime4\" value=\"" + String(settings->onTime4) + "\" min=\"0\"><br>";
     html += "Zyklusanteil (in Prozent): ";
     html += "<input type=\"number\" name=\"onPercentage4\" value=\"" + String(settings->onPercentage4) + "\" min=\"0\" max=\"100\"><br><br>";
+
+    html += "<a href=\"/update_values\" class='btn btn-secondary'>speichern</a><br><br>";  // Button für Aktoreinstellungen
+
+    
+
 
     server.send(200, "text/html", html);
 }
@@ -198,10 +155,7 @@ void handleSetValues(Settings* settings, WebServer& server, Preferences* prefere
     if (server.hasArg("hysteresis")) {
         settings->hysteresis = server.arg("hysteresis").toFloat();
     }
-
-    // Speichere die neuen Werte sofort
-    saveCurrentSettings(settings, preferences);
-
+    saveCurrentSettings(*settings, preferences);    
     server.sendHeader("Location", "/"); // Umleitung zur Root-Seite
     server.send(303); // 303 Redirect
 }
