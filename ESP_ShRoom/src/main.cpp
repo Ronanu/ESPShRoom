@@ -32,19 +32,11 @@ FanControl* fanControl3;
 FanControl* fanControl4;
 
 TemperatureController tempcontr1(& settings.targetTemperature, & settings.hysteresis);
-
-
-
-
+OfflineClock offline_clock(& settings, & preferences);
 
 void setup() {
-    // NVS Initialisierung und Werte laden
-    preferences.begin("my-app", false);
-    loadSettings(& settings, & preferences);
-
     Serial.begin(115200);
-
-    settings.crashcounter++;
+    offline_clock.startClock();
 
     // Initialisierung der Sensoren
     if (!sht20_1.begin()) {
@@ -90,6 +82,7 @@ void setup() {
 
 void loop() {
     unsigned long start = millis();
+    settings.lastUpdateTime = start;
     //Sensordaten aktualisieren
     settings.temperature1 = sht20_1.getTemperature();
     //settings.temperature2 = sht20_2.getTemperature();
@@ -97,7 +90,7 @@ void loop() {
     //settings.humidity2 = sht20_2.getHumidity();
 
     // Uhrzeit aktualisieren
-    updateTime(&settings, &preferences);    
+    offline_clock.updateTime();
 
     settings.isEnabled3 = tempcontr1.update(settings. isEnabled3, settings.temperature1);
     

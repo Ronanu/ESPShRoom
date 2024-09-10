@@ -32,35 +32,6 @@ void handleSetTime(Settings* settings, WebServer& server, Preferences* preferenc
 }
 
 
-void updateTime(Settings* settings, Preferences* preferences) {
-    unsigned long currentMillis = millis();
-
-    // Modulo-Operator, um zu prüfen, ob eine Sekunde vergangen ist
-    if (currentMillis - settings->lastUpdateTime >= 1000) { 
-        settings->seconds++;
-        settings->lastUpdateTime = currentMillis;
-        saveCurrentSettings(*settings, preferences);
-
-        if (settings->seconds >= 60) {
-            settings->seconds = 0;
-            settings->minutes++;            
-
-            if (settings->minutes >= 60) {
-                settings->minutes = 0;
-                settings->hours++;
-
-                if (settings->hours >= 24) {
-                    settings->hours = 0;
-                }
-            }
-        }
-    }
-    
-}
-
-
-
-
 // ### Set-Values-Handler ###
 
 void handleSetValuesPage(Settings* settings, WebServer& server) {
@@ -109,9 +80,6 @@ void handleSetValuesPage(Settings* settings, WebServer& server) {
 
     html += "<a href=\"/update_values\" class='btn btn-secondary'>speichern</a><br><br>";  // Button für Aktoreinstellungen
 
-    
-
-
     server.send(200, "text/html", html);
 }
 
@@ -155,8 +123,10 @@ void handleSetValues(Settings* settings, WebServer& server, Preferences* prefere
     if (server.hasArg("hysteresis")) {
         settings->hysteresis = server.arg("hysteresis").toFloat();
     }
-    saveCurrentSettings(*settings, preferences);    
+      
     server.sendHeader("Location", "/"); // Umleitung zur Root-Seite
     server.send(303); // 303 Redirect
+    
+    saveCurrentSettings(*settings, preferences);  
 }
 

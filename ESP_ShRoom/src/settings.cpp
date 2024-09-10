@@ -59,7 +59,7 @@ void saveCurrentSettings(Settings settings, Preferences* preferences) {
 }
 
 void loadSettings(Settings* settings, Preferences* preferences) {
-    settings->onTime1 = preferences->getInt("onTime1", 10);
+    settings->onTime1 = preferences->getInt("onTime1");
     settings->onTime2 = preferences->getInt("onTime2", 10);
     settings->onTime3 = preferences->getInt("onTime3", 10);
     settings->onTime4 = preferences->getInt("onTime4", 10);

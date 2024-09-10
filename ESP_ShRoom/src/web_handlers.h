@@ -10,6 +10,27 @@ void handleSetValues(Settings* settings, WebServer& server, Preferences* prefere
 void handleSetTimePage(Settings* settings, WebServer& server);
 void handleSetTime(Settings* settings, WebServer& server, Preferences* preferences);
 
-void updateTime(Settings* settings, Preferences* preferences);
+
 
 #endif
+
+#ifndef OFFLINE_CLOCK_H
+#define OFFLINE_CLOCK_H
+
+class OfflineClock {
+private:
+    unsigned long StartMillis;   // Speichert die Startzeit in Millisekunden
+    unsigned long LastSecond;    // Speichert den letzten verstrichenen Sekundenwert
+    Settings* settings;          // Zeiger auf das Settings-Objekt
+    Preferences* preferences;    // Zeiger auf das Preferences-Objekt
+
+public:
+    // Konstruktor zur Initialisierung von StartMillis und LastSecond
+    OfflineClock(Settings* settings, Preferences* preferences);
+
+    // Methode zur Aktualisierung der Zeit
+    void startClock();
+    void updateTime();
+};
+
+#endif // OFFLINE_CLOCK_H

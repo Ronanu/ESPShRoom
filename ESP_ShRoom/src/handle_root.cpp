@@ -60,10 +60,7 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "<h3>Steckdose 2:</h3>";  // Steckdose 2 als Unterüberschrift
     html += "Aktive Laufzeit: <span id='onTime4'>" + String(settings->onTime4) + "</span> Sekunden<br>";  // Normaler Text
     html += "Zyklusanteil: <span id='onPercentage4'>" + String(settings->onPercentage4) + "</span> %<br><br>";  // Normaler Text
-
     html += "</div>";
-
-    html += "<a href=\"/set_values\" class='btn btn-secondary'>Einstellungen</a><br><br>";  // Button für Aktoreinstellungen
 
     // Uhranzeige am Ende der Seite in einer Zeile
     html += "<h2>Aktuelle Uhrzeit</h2>";
@@ -72,6 +69,8 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "<span id='minutes'>" + String(settings->minutes < 10 ? "0" : "") + String(settings->minutes) + "</span> : ";
     html += "<span id='seconds'>" + String(settings->seconds < 10 ? "0" : "") + String(settings->seconds) + "</span>";
     html += "</div>";
+
+    html += "<a href=\"/setTime\" class='btn btn-secondary'>Einstellungen Uhr</a><br><br>";  // Button für Aktoreinstellungen
 
     // JavaScript für AJAX-Updates
     html += "<script>";

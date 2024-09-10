@@ -9,12 +9,16 @@ TemperatureController::TemperatureController(float* targetTemperature, float* hy
 
 // Methode zur Aktualisierung des Heizungsstatus
 bool TemperatureController::update(bool currentState, float currentTemperature) {
+    if (currentTemperature < realistic_lower_limit || currentTemperature > realistic_upper_limit){
+        // Temperatur ist außerhalb des realistischen Bereichs, Heizung ausschalten
+        return false;
+    }
+    else
+
+
     if (currentTemperature < *targetTemperature_ - *hysteresis_) {
         // Temperatur ist unterhalb des unteren Schwellenwerts, Heizung einschalten
-        if (currentTemperature > realistic_lower_limit && currentTemperature < realistic_upper_limit){
-            return true;
-        }
-        
+        return true;
     }
     else if (currentTemperature > *targetTemperature_ + *hysteresis_) {
         // Temperatur ist oberhalb des oberen Schwellenwerts, Heizung ausschalten
