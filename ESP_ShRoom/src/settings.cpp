@@ -26,11 +26,13 @@ void printSettings(const Settings& settings) {
     Serial.print("hours: "); Serial.println(settings.hours);
     Serial.print("minutes: "); Serial.println(settings.minutes);
     Serial.print("seconds: "); Serial.println(settings.seconds);
-    Serial.print("lastUpdateTime: "); Serial.println(settings.lastUpdateTime);
 
     Serial.println("=== SensorSettings ===");
     Serial.print("temperature1: "); Serial.println(settings.temperature1);
     Serial.print("temperature2: "); Serial.println(settings.temperature2);
     Serial.print("humidity1: "); Serial.println(settings.humidity1);
     Serial.print("humidity2: "); Serial.println(settings.humidity2);
+
+    Serial.print("lastUpdateTime: "); Serial.println(settings.lastUpdateTime);
+    Serial.print("crashcounter: "); Serial.println(settings.crashcounter);
 }

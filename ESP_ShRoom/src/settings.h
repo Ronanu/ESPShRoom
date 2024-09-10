@@ -25,7 +25,10 @@ struct Settings {
     int hours;
     int minutes;
     int seconds;
+
+    // stability indicators
     int lastUpdateTime;
+    int crashcounter;
 
     // SensorSettings
     float temperature1;
