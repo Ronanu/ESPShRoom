@@ -36,7 +36,7 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "Aktive Laufzeit: <span id='onTime2'>" + String(settings->onTime2) + "</span> Sekunden<br>";
     html += "Zyklusanteil: <span id='onPercentage2'>" + String(settings->onPercentage2) + "</span> %<br><br>";
 
-    html += "<strong>Steckdose 1:</strong><br>";
+    html += "<strong>Steckdose 1:</strong> (Temperaturreglergesteuert)<br>";
     html += "Aktive Laufzeit: <span id='onTime3'>" + String(settings->onTime3) + "</span> Sekunden<br>";
     html += "Zyklusanteil: <span id='onPercentage3'>" + String(settings->onPercentage3) + "</span> %<br><br>";
 
@@ -44,7 +44,9 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "Aktive Laufzeit: <span id='onTime4'>" + String(settings->onTime4) + "</span> Sekunden<br>";
     html += "Zyklusanteil: <span id='onPercentage4'>" + String(settings->onPercentage4) + "</span> %<br><br>";
 
-    html += "<strong>Soll-Temperatur:</strong> <span id='targetTemperature'>" + String(settings->targetTemperature, 1) + "</span> &deg;C<br>";
+    html += "<strong>Temperaturregler:</strong><br>";
+    html += "Soll-Temperatur: <span id='targetTemperature'>" + String(settings->targetTemperature, 1) + "</span> &deg;C<br>";
+    html += "Hyterese: " + String(settings->hysteresis, 2) + " &deg;C<br><br>";
     html += "<a href=\"/set_values\" class='btn btn-secondary'>Sollwerte umstellen</a>";
     html += "</div>";
 
