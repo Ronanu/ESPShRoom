@@ -20,9 +20,9 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "<h2>Sensordaten</h2>";
     html += "<div class='sensor-data'>";
     html += "<strong>Temperatur 1:</strong> <span id='temperature1'>" + String(settings->temperature1, 1) + "</span> &deg;C<br>";
-    html += "<strong>Temperatur 2:</strong> <span id='temperature2'>" + String(settings->temperature2, 1) + "</span> &deg;C<br>";
+    //html += "<strong>Temperatur 2:</strong> <span id='temperature2'>" + String(settings->temperature2, 1) + "</span> &deg;C<br>";
     html += "<strong>Luftfeuchtigkeit 1:</strong> <span id='humidity1'>" + String(settings->humidity1, 1) + "</span> %<br>";
-    html += "<strong>Luftfeuchtigkeit 2:</strong> <span id='humidity2'>" + String(settings->humidity2, 1) + "</span> %<br>";
+    // html += "<strong>Luftfeuchtigkeit 2:</strong> <span id='humidity2'>" + String(settings->humidity2, 1) + "</span> %<br>";
     html += "</div>";
 
     // Anzeige der aktuellen Lüfterlaufzeit und Zyklusanteil
@@ -36,11 +36,11 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "Aktive Laufzeit: <span id='onTime2'>" + String(settings->onTime2) + "</span> Sekunden<br>";
     html += "Zyklusanteil: <span id='onPercentage2'>" + String(settings->onPercentage2) + "</span> %<br><br>";
 
-    html += "<strong>L&uuml;fter 3:</strong><br>";
+    html += "<strong>Steckdose 1:</strong><br>";
     html += "Aktive Laufzeit: <span id='onTime3'>" + String(settings->onTime3) + "</span> Sekunden<br>";
     html += "Zyklusanteil: <span id='onPercentage3'>" + String(settings->onPercentage3) + "</span> %<br><br>";
 
-    html += "<strong>L&uuml;fter 4:</strong><br>";
+    html += "<strong>Steckdose 2:</strong><br>";
     html += "Aktive Laufzeit: <span id='onTime4'>" + String(settings->onTime4) + "</span> Sekunden<br>";
     html += "Zyklusanteil: <span id='onPercentage4'>" + String(settings->onPercentage4) + "</span> %<br><br>";
 

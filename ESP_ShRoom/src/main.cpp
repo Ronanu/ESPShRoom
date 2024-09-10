@@ -7,20 +7,16 @@
 #include <Preferences.h>
 #include "web_handlers.h"
 #include "handle_root.h"
+#include "SHT20Sensor.h"
 
 // Sensor-Instanzen
-uFire_SHT20 sht20_1;  // Sensor 1 an Pin 21, 22
-uFire_SHT20 sht20_2;  // Sensor 2 an Pin 18, 19
-
-// Sensordaten
-float temperature1;
-float temperature2;
-float humidity1;
-float humidity2;
+SHT20Sensor sht20_1(18, 19, Wire);  // Sensor 1 an Pin 18, 19
+//SHT20Sensor sht20_2(21, 22, Wire1);  // Sensor 2 an Pin 21, 22
 
 // Globales Settings-Objekt
 Settings settings;
 
+// Preferences-Objekt, das abgespeichert wird
 Preferences preferences;
 
 const char* ssid = "ESP32_AP";
@@ -39,24 +35,17 @@ void setup() {
     Serial.begin(115200);
 
     // Initialisierung der Sensoren
-  Wire.begin(21, 22);  // SDA, SCL für Sensor 1
-
-    for (int i = 0; i < 5 && !sht20_1.begin(); i++) {
-        Serial.println("Sensor 1 nicht gefunden, überprüfe die Verkabelung!");
-        delay(500);  // Warte eine halbe Sekunde
-    }
-
     if (!sht20_1.begin()) {
-        Serial.println("Maximale Anzahl von Versuchen erreicht, Sensor 1 konnte nicht verbunden werden.");
-        // while(1);  // Optional, falls du das Programm anhalten möchtest
-    }
-
-    //Wire.begin(18, 19);  // SDA, SCL für Sensor 2
+            Serial.println("Maximale Anzahl von Versuchen erreicht, Sensor 1 konnte nicht verbunden werden.");
+        } else {
+            Serial.println("Sensor 1 erfolgreich initialisiert.");
+        }
     //if (!sht20_2.begin()) {
-    //    Serial.println("Sensor 2 nicht gefunden, überprüfe die Verkabelung!");
-    //    //while (1);
-    //}
-
+    //        Serial.println("Maximale Anzahl von Versuchen erreicht, Sensor 2 konnte nicht verbunden werden.");
+    //    } else {
+    //        Serial.println("Sensor 2 erfolgreich initialisiert.");
+    //   }
+    
     // Konfiguration des ESP32 als Access Point
     WiFi.softAP(ssid, password);
     Serial.println("Access Point gestartet");
@@ -95,21 +84,15 @@ void setup() {
 void loop() {
     int start = millis();
     //Sensordaten aktualisieren
-    temperature1 = sht20_1.temperature();
-    humidity1 = sht20_1.humidity();
-    //Wire.begin(18, 19);  // Wechsel zu Sensor 2
-    //temperature2 = sht20_2.temperature();
-    //humidity2 = sht20_2.humidity();
-
-    settings.temperature1 = temperature1;
-    settings.temperature2 = temperature2;
-    settings.humidity1 = humidity1;
-    settings.humidity2 = humidity2;
+    settings.temperature1 = sht20_1.getTemperature();
+    //settings.temperature2 = sht20_2.getTemperature();
+    settings.humidity1 = sht20_1.getHumidity();
+    //settings.humidity2 = sht20_2.getHumidity();
 
     // Uhrzeit aktualisieren
     updateTime(&settings, &preferences);
-    Serial.println("Temperatur 1: " + String(temperature1, 1) + " °C, Luftfeuchtigkeit 1: " + String(humidity1, 1) + " %");
-    Serial.println("Temperatur 2: " + String(settings.temperature2, 1) + " °C, Luftfeuchtigkeit 2: " + String(humidity2, 1) + " %");
+    Serial.println("Temperatur 1: " + String(settings.temperature1, 1) + " °C, Luftfeuchtigkeit 1: " + String(settings.humidity1, 1) + " %");
+    //Serial.println("Temperatur 2: " + String(settings.temperature2, 1) + " °C, Luftfeuchtigkeit 2: " + String(humidity2, 1) + " %");
 
     // Aktualisiere den Lüfterstatus für alle vier Lüfter
     fanControl1->update();

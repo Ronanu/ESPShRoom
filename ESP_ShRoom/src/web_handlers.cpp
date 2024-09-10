@@ -107,30 +107,38 @@ void handleSetValuesPage(Settings* settings, WebServer& server) {
     html += "<h1>Sollwerte umstellen</h1>";
     html += "<form action=\"/update_values\" method=\"POST\">";
 
-    // Eingabefelder für Lüfter aktive Laufzeit und Zyklusanteil
-    html += "L&uuml;fter 1 Aktive Laufzeit (in Sekunden): ";
+    // Lüfter 1
+    html += "<h2>L&uuml;fter 1</h2>";
+    html += "Aktive Laufzeit (in Sekunden): ";
     html += "<input type=\"number\" name=\"onTime1\" value=\"" + String(settings->onTime1) + "\" min=\"0\"><br>";
-    html += "L&uuml;fter 1 Zyklusanteil (in Prozent): ";
-    html += "<input type=\"number\" name=\"onPercentage1\" value=\"" + String(settings->onPercentage1) + "\" min=\"0\" max=\"100\"><br>";
+    html += "Zyklusanteil (in Prozent): ";
+    html += "<input type=\"number\" name=\"onPercentage1\" value=\"" + String(settings->onPercentage1) + "\" min=\"0\" max=\"100\"><br><br>";
 
-    html += "L&uuml;fter 2 Aktive Laufzeit (in Sekunden): ";
+    // Lüfter 2
+    html += "<h2>L&uuml;fter 2</h2>";
+    html += "Aktive Laufzeit (in Sekunden): ";
     html += "<input type=\"number\" name=\"onTime2\" value=\"" + String(settings->onTime2) + "\" min=\"0\"><br>";
-    html += "L&uuml;fter 2 Zyklusanteil (in Prozent): ";
-    html += "<input type=\"number\" name=\"onPercentage2\" value=\"" + String(settings->onPercentage2) + "\" min=\"0\" max=\"100\"><br>";
+    html += "Zyklusanteil (in Prozent): ";
+    html += "<input type=\"number\" name=\"onPercentage2\" value=\"" + String(settings->onPercentage2) + "\" min=\"0\" max=\"100\"><br><br>";
 
-    html += "L&uuml;fter 3 Aktive Laufzeit (in Sekunden): ";
+    // Steckdose 1 (ehemals Lüfter 3)
+    html += "<h2>Steckdose 1</h2>";
+    html += "Aktive Laufzeit (in Sekunden): ";
     html += "<input type=\"number\" name=\"onTime3\" value=\"" + String(settings->onTime3) + "\" min=\"0\"><br>";
-    html += "L&uuml;fter 3 Zyklusanteil (in Prozent): ";
-    html += "<input type=\"number\" name=\"onPercentage3\" value=\"" + String(settings->onPercentage3) + "\" min=\"0\" max=\"100\"><br>";
+    html += "Zyklusanteil (in Prozent): ";
+    html += "<input type=\"number\" name=\"onPercentage3\" value=\"" + String(settings->onPercentage3) + "\" min=\"0\" max=\"100\"><br><br>";
 
-    html += "L&uuml;fter 4 Aktive Laufzeit (in Sekunden): ";
+    // Steckdose 2 (ehemals Lüfter 4)
+    html += "<h2>Steckdose 2</h2>";
+    html += "Aktive Laufzeit (in Sekunden): ";
     html += "<input type=\"number\" name=\"onTime4\" value=\"" + String(settings->onTime4) + "\" min=\"0\"><br>";
-    html += "L&uuml;fter 4 Zyklusanteil (in Prozent): ";
-    html += "<input type=\"number\" name=\"onPercentage4\" value=\"" + String(settings->onPercentage4) + "\" min=\"0\" max=\"100\"><br>";
+    html += "Zyklusanteil (in Prozent): ";
+    html += "<input type=\"number\" name=\"onPercentage4\" value=\"" + String(settings->onPercentage4) + "\" min=\"0\" max=\"100\"><br><br>";
 
-    // Eingabefeld für Soll-Temperatur
+    // Soll-Temperatur
+    html += "<h2>Soll-Temperatur</h2>";
     html += "Soll-Temperatur (in &deg;C): ";
-    html += "<input type=\"number\" name=\"targetTemp\" value=\"" + String(settings->targetTemperature, 1) + "\" step=\"0.1\"><br>";
+    html += "<input type=\"number\" name=\"targetTemp\" value=\"" + String(settings->targetTemperature, 1) + "\" step=\"0.1\"><br><br>";
 
     html += "<input type=\"submit\" value=\"Werte setzen\">";
     html += "</form>";
