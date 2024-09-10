@@ -20,9 +20,7 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "<h2>Sensordaten</h2>";
     html += "<div class='sensor-data'>";
     html += "<strong>Temperatur 1:</strong> <span id='temperature1'>" + String(settings->temperature1, 1) + "</span> &deg;C<br>";
-    //html += "<strong>Temperatur 2:</strong> <span id='temperature2'>" + String(settings->temperature2, 1) + "</span> &deg;C<br>";
     html += "<strong>Luftfeuchtigkeit 1:</strong> <span id='humidity1'>" + String(settings->humidity1, 1) + "</span> %<br>";
-    // html += "<strong>Luftfeuchtigkeit 2:</strong> <span id='humidity2'>" + String(settings->humidity2, 1) + "</span> %<br>";
     html += "</div>";
 
     // Anzeige der aktuellen Lüfterlaufzeit und Zyklusanteil
@@ -52,10 +50,8 @@ void handleRoot(Settings* settings, WebServer& server) {
 
     // Uhranzeige basierend auf den Settings
     html += "<h2>Aktuelle Uhrzeit</h2>";
-    String timeStr = String(settings->hours) + ":" + 
-                     (settings->minutes < 10 ? "0" : "") + String(settings->minutes) + ":" + 
-                     (settings->seconds < 10 ? "0" : "") + String(settings->seconds);
-    html += "<div id='time' class='alert alert-info text-center'>" + timeStr + "</div>";
+    html += "<div id='time' class='alert alert-info text-center'></div>"; // Kein vorgefertigter Wert mehr hier
+
     html += "<a href=\"/setTime\" class='btn btn-primary'>Uhrzeit einstellen</a>";
 
     // AJAX zur dynamischen Aktualisierung
@@ -84,10 +80,34 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "  xhr.open('GET', '/updateData', true);";
     html += "  xhr.send();";
     html += "}";
-    html += "setInterval(updateData, 500);";  // Aktualisierung alle 5 Sekunden
+    html += "setInterval(updateData, 5000);";  // Aktualisierung alle 5 Sekunden
     html += "</script>";
 
     html += "</div></body></html>";
 
     server.send(200, "text/html", html);
+}
+
+// Diese Funktion liefert die aktuellen Werte im JSON-Format zurück
+void handleUpdateData(Settings* settings, WebServer& server) {
+    String json = "{";
+    json += "\"onTime1\":" + String(settings->onTime1) + ",";
+    json += "\"onPercentage1\":" + String(settings->onPercentage1) + ",";
+    json += "\"onTime2\":" + String(settings->onTime2) + ",";
+    json += "\"onPercentage2\":" + String(settings->onPercentage2) + ",";
+    json += "\"onTime3\":" + String(settings->onTime3) + ",";
+    json += "\"onPercentage3\":" + String(settings->onPercentage3) + ",";
+    json += "\"onTime4\":" + String(settings->onTime4) + ",";
+    json += "\"onPercentage4\":" + String(settings->onPercentage4) + ",";
+    json += "\"targetTemperature\":" + String(settings->targetTemperature, 1) + ",";
+    json += "\"temperature1\":" + String(settings->temperature1, 1) + ",";
+    json += "\"temperature2\":" + String(settings->temperature2, 1) + ",";
+    json += "\"humidity1\":" + String(settings->humidity1, 1) + ",";
+    json += "\"humidity2\":" + String(settings->humidity2, 1) + ",";
+    json += "\"hours\":" + String(settings->hours) + ",";
+    json += "\"minutes\":" + String(settings->minutes) + ",";
+    json += "\"seconds\":" + String(settings->seconds);
+    json += "}";
+
+    server.send(200, "application/json", json);
 }

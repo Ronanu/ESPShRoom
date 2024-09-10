@@ -5,7 +5,7 @@
 #include <Preferences.h>
 #include "settings.h"
 
-void handleTime(Settings* settings, WebServer& server);
+
 void handleSetValuesPage(Settings* settings, WebServer& server);
 void handleSetValues(Settings* settings, WebServer& server, Preferences* preferences);
 void handleSetTimePage(Settings* settings, WebServer& server);

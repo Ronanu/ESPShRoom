@@ -65,12 +65,11 @@ void setup() {
 
     // Webserver Routen
     server.on("/", [&]() { handleRoot(&settings, server); });
-    server.on("/time", [&]() { handleTime(&settings, server); });
     server.on("/setTime", [&]() { handleSetTimePage(&settings, server); });
-    server.on("/updateTime", [&]() { handleSetTime(&settings, server, &preferences); });
     server.on("/set_values", [&]() { handleSetValuesPage(&settings, server); });
     // Registriere den Endpunkt für die Datenaktualisierung
     server.on("/updateData", [&]() { handleUpdateData(&settings, server); });
+    server.on("/updateTime", [&]() { handleSetTime(&settings, server, &preferences); });
     server.on("/update_values", [&]() { handleSetValues(&settings, server, &preferences); });
     server.begin();
     Serial.println("Webserver gestartet");

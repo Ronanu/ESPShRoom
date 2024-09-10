@@ -35,10 +35,6 @@ void handleSetTime(Settings* settings, WebServer& server, Preferences* preferenc
     }
 }
 
-void handleTime(Settings* settings, WebServer& server) {
-    String time = String(settings->hours) + ":" + String(settings->minutes) + ":" + String(settings->seconds);
-    server.send(200, "text/plain", time);
-}
 
 void updateTime(Settings* settings, Preferences* preferences) {
     unsigned long currentMillis = millis();
