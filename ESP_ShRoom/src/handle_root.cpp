@@ -4,7 +4,7 @@
 void handleRoot(Settings* settings, WebServer& server) {
     String html = "<!DOCTYPE html><html lang='de'><head>";
     html += "<meta charset='UTF-8'>";
-    html += "<meta name='viewport' content='width=device-width, initial-scale=1.25'>";
+    html += "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
     html += "<title>ESP32 Steuerung</title>";
     html += "<link href='https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css' rel='stylesheet'>";
     html += "<style>";
@@ -16,55 +16,62 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "</head><body>";
     html += "<div class='container'>";
     
-    // Überschrift
-    html += "<h1 class='text-center'>ESP32 Steuerung</h1>";
+    // Überschrift: Sensordaten
+    html += "<h1 class='text-center'>Sensordaten</h1>";
 
     // Ausgabe der Runtime direkt nach der Überschrift
     html += "<div class='runtime'>Laufzeit: <span id='lastUpdateTime'>" + String(settings->lastUpdateTime) + "</span> ms</div><br>";  // ID für lastUpdateTime bleibt unverändert
 
     // Ausgabe der aktuellen Sensordaten
-    html += "<h2>Sensordaten</h2>";
-    html += "<div class='sensor-data'>";
+    html += "<h3>Sensordaten</h3>";
     html += "<strong>Temperatur 1:</strong> <span id='temperature1'>" + String(settings->temperature1, 3) + "</span> &deg;C<br>";  // Temperatur ID
     html += "<strong>Luftfeuchtigkeit 1:</strong> <span id='humidity1'>" + String(settings->humidity1, 3) + "</span> %<br>";  // Luftfeuchtigkeit ID
     html += "</div>";
 
-    // Anzeige der aktuellen Lüfterlaufzeit und Zyklusanteil
-    html += "<h2>Aktuelle Sollwerte</h2>";
-    html += "<div class='sensor-data'>";
-    html += "<strong>L&uuml;fter 1:</strong><br>";
-    html += "Aktive Laufzeit: <span id='onTime1'>" + String(settings->onTime1) + "</span> Sekunden<br>";  // Lüfter 1 Laufzeit ID
-    html += "Zyklusanteil: <span id='onPercentage1'>" + String(settings->onPercentage1) + "</span> %<br><br>";  // Lüfter 1 Zyklusanteil ID
+    // Überschrift: Sollzustände
+    html += "<h2>Sollzustände</h2>";
+    html += "<div class='soll-data'>";
+    html += "<strong>Soll-Temperatur:</strong> <span id='targetTemperature'>" + String(settings->targetTemperature, 1) + "</span> &deg;C<br>";
+    html += "<strong>Hysterese:</strong> <span id='hysteresis'>" + String(settings->hysteresis, 2) + "</span> &deg;C<br><br>";  // Hysterese fett
+    html += "<a href=\"/set_values\" class='btn btn-secondary'>Einstellungen</a><br><br>";  // Button für Einstellungen unter Temperaturregler
 
-    html += "<strong>L&uuml;fter 2:</strong><br>";
-    html += "Aktive Laufzeit: <span id='onTime2'>" + String(settings->onTime2) + "</span> Sekunden<br>";
-    html += "Zyklusanteil: <span id='onPercentage2'>" + String(settings->onPercentage2) + "</span> %<br><br>";
+    // Überschrift: Aktoreinstellungen
+    html += "<h2>Aktoreinstellungen</h2>";
+    html += "<div class='aktor_settings'>";
 
-    html += "<strong>Steckdose 1:</strong> (Temperaturreglergesteuert)<br>";
-    html += "Aktive Laufzeit: <span id='onTime3'>" + String(settings->onTime3) + "</span> Sekunden<br>";
-    html += "Zyklusanteil: <span id='onPercentage3'>" + String(settings->onPercentage3) + "</span> %<br><br>";
+    // Lüfter 1
+    html += "<h3>L&uuml;fter 1:</h3>";  // Lüfter 1 als Unterüberschrift
+    html += "Aktive Laufzeit: <span id='onTime1'>" + String(settings->onTime1) + "</span> Sekunden<br>";  // Normaler Text
+    html += "Zyklusanteil: <span id='onPercentage1'>" + String(settings->onPercentage1) + "</span> %<br><br>";  // Normaler Text
 
-    html += "<strong>Steckdose 2:</strong><br>";
-    html += "Aktive Laufzeit: <span id='onTime4'>" + String(settings->onTime4) + "</span> Sekunden<br>";
-    html += "Zyklusanteil: <span id='onPercentage4'>" + String(settings->onPercentage4) + "</span> %<br><br>";
+    // Lüfter 2
+    html += "<h3>L&uuml;fter 2:</h3>";  // Lüfter 2 als Unterüberschrift
+    html += "Aktive Laufzeit: <span id='onTime2'>" + String(settings->onTime2) + "</span> Sekunden<br>";  // Normaler Text
+    html += "Zyklusanteil: <span id='onPercentage2'>" + String(settings->onPercentage2) + "</span> %<br><br>";  // Normaler Text
 
-    html += "<strong>Temperaturregler:</strong><br>";
-    html += "Soll-Temperatur: <span id='targetTemperature'>" + String(settings->targetTemperature, 1) + "</span> &deg;C<br>";
-    html += "Hyterese: <span id='hysteresis'>" + String(settings->hysteresis, 2) + "</span> &deg;C<br><br>";  // ID für Hysterese hinzugefügt
-    html += "<a href=\"/set_values\" class='btn btn-secondary'>Sollwerte umstellen</a>";
+    // Steckdose 1
+    html += "<h3>Steckdose 1:</h3>";  // Steckdose 1 als Unterüberschrift
+    html += "Aktive Laufzeit: <span id='onTime3'>" + String(settings->onTime3) + "</span> Sekunden<br>";  // Normaler Text
+    html += "Zyklusanteil: <span id='onPercentage3'>" + String(settings->onPercentage3) + "</span> %<br><br>";  // Normaler Text
+
+    // Steckdose 2
+    html += "<h3>Steckdose 2:</h3>";  // Steckdose 2 als Unterüberschrift
+    html += "Aktive Laufzeit: <span id='onTime4'>" + String(settings->onTime4) + "</span> Sekunden<br>";  // Normaler Text
+    html += "Zyklusanteil: <span id='onPercentage4'>" + String(settings->onPercentage4) + "</span> %<br><br>";  // Normaler Text
+
     html += "</div>";
 
-    // Uhranzeige am Ende der Seite
+    html += "<a href=\"/set_values\" class='btn btn-secondary'>Einstellungen</a><br><br>";  // Button für Aktoreinstellungen
+
+    // Uhranzeige am Ende der Seite in einer Zeile
     html += "<h2>Aktuelle Uhrzeit</h2>";
     html += "<div class='alert alert-info text-center'>";
-    html += "Stunden: <span id='hours'>" + String(settings->hours) + "</span><br>";  // Stunden-ID hinzugefügt
-    html += "Minuten: <span id='minutes'>" + String(settings->minutes) + "</span><br>";  // Minuten-ID hinzugefügt
-    html += "Sekunden: <span id='seconds'>" + String(settings->seconds) + "</span>";  // Sekunden-ID hinzugefügt
+    html += "<span id='hours'>" + String(settings->hours) + "</span> : ";
+    html += "<span id='minutes'>" + String(settings->minutes < 10 ? "0" : "") + String(settings->minutes) + "</span> : ";
+    html += "<span id='seconds'>" + String(settings->seconds < 10 ? "0" : "") + String(settings->seconds) + "</span>";
     html += "</div>";
 
-    html += "<a href=\"/setTime\" class='btn btn-primary'>Uhrzeit einstellen</a>";
-
-    // AJAX zur dynamischen Aktualisierung
+    // JavaScript für AJAX-Updates
     html += "<script>";
     html += "function updateData() {";
     html += "  var xhr = new XMLHttpRequest();";
@@ -80,22 +87,19 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "      document.getElementById('onTime4').innerHTML = data.onTime4;";
     html += "      document.getElementById('onPercentage4').innerHTML = data.onPercentage4;";
     html += "      document.getElementById('targetTemperature').innerHTML = data.targetTemperature;";
+    html += "      document.getElementById('hysteresis').innerHTML = data.hysteresis;";
     html += "      document.getElementById('temperature1').innerHTML = data.temperature1;";
-    html += "      document.getElementById('temperature2').innerHTML = data.temperature2;";
     html += "      document.getElementById('humidity1').innerHTML = data.humidity1;";
-    html += "      document.getElementById('humidity2').innerHTML = data.humidity2;";
-
-    // Aktualisiere Stunden, Minuten, Sekunden und die LastUpdateTime
-    html += "      document.getElementById('hours').innerHTML = data.hours;";
-    html += "      document.getElementById('minutes').innerHTML = data.minutes;";
-    html += "      document.getElementById('seconds').innerHTML = data.seconds;";
     html += "      document.getElementById('lastUpdateTime').innerHTML = data.lastUpdateTime;";
+    html += "      document.getElementById('hours').innerHTML = data.hours;";
+    html += "      document.getElementById('minutes').innerHTML = (data.minutes < 10 ? '0' : '') + data.minutes;";
+    html += "      document.getElementById('seconds').innerHTML = (data.seconds < 10 ? '0' : '') + data.seconds;";
     html += "    }";
     html += "  };";
     html += "  xhr.open('GET', '/updateData', true);";
     html += "  xhr.send();";
     html += "}";
-    html += "setInterval(updateData, 500);";  // Aktualisierung alle .5 Sekunden
+    html += "setInterval(updateData, 400);";  // Aktualisierung alle 2 Sekunden
     html += "</script>";
 
     html += "</div></body></html>";
@@ -114,14 +118,15 @@ void handleUpdateData(Settings* settings, WebServer& server) {
     json += "\"onPercentage3\":" + String(settings->onPercentage3) + ",";
     json += "\"onTime4\":" + String(settings->onTime4) + ",";
     json += "\"onPercentage4\":" + String(settings->onPercentage4) + ",";
-    json += "\"targetTemperature\":" + String(settings->targetTemperature, 1) + ",";
-    json += "\"temperature1\":" + String(settings->temperature1, 1) + ",";
-    json += "\"temperature2\":" + String(settings->temperature2, 1) + ",";
-    json += "\"humidity1\":" + String(settings->humidity1, 1) + ",";
-    json += "\"humidity2\":" + String(settings->humidity2, 1) + ",";
+    json += "\"targetTemperature\":" + String(settings->targetTemperature) + ",";
+    json += "\"temperature1\":" + String(settings->temperature1) + ",";
+    json += "\"temperature2\":" + String(settings->temperature2) + ",";
+    json += "\"humidity1\":" + String(settings->humidity1) + ",";
+    json += "\"humidity2\":" + String(settings->humidity2) + ",";
     json += "\"hours\":" + String(settings->hours) + ",";
     json += "\"minutes\":" + String(settings->minutes) + ",";
     json += "\"seconds\":" + String(settings->seconds) + ",";
+    json += "\"hysteresis\":" + String(settings->hysteresis) + ",";  // Hysterese hinzugefügt
     json += "\"lastUpdateTime\":" + String(settings->lastUpdateTime);  // Füge die Laufzeit hinzu
     json += "}";
 
