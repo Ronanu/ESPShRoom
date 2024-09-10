@@ -81,6 +81,9 @@ void setup() {
 }
 
 void loop() {
+    // Webserver anfragen bearbeiten
+    server.handleClient();
+
     unsigned long start = millis();
     settings.lastUpdateTime = start;
     //Sensordaten aktualisieren
@@ -94,9 +97,6 @@ void loop() {
 
     settings.isEnabled3 = tempcontr1.update(settings. isEnabled3, settings.temperature1);
     
-    // Webserver anfragen bearbeiten
-    server.handleClient();
-
     // Aktualisiere den Lüfterstatus für alle vier Lüfter
     fanControl1->update();
     fanControl2->update();

@@ -97,12 +97,13 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "      document.getElementById('hours').innerHTML = data.hours;";
     html += "      document.getElementById('minutes').innerHTML = (data.minutes < 10 ? '0' : '') + data.minutes;";
     html += "      document.getElementById('seconds').innerHTML = (data.seconds < 10 ? '0' : '') + data.seconds;";
+    html += "      document.getElementById('crashcounter').innerHTML = data.crashcounter;";
     html += "    }";
     html += "  };";
     html += "  xhr.open('GET', '/updateData', true);";
     html += "  xhr.send();";
     html += "}";
-    html += "setInterval(updateData, 400);";  // Aktualisierung alle 2 Sekunden
+    html += "setInterval(updateData, 600);";  // Aktualisierung alle 2 Sekunden
     html += "</script>";
 
     html += "</div></body></html>";
@@ -130,6 +131,7 @@ void handleUpdateData(Settings* settings, WebServer& server) {
     json += "\"minutes\":" + String(settings->minutes) + ",";
     json += "\"seconds\":" + String(settings->seconds) + ",";
     json += "\"hysteresis\":" + String(settings->hysteresis) + ",";  // Hysterese hinzugefügt
+    json += "\"crashcounter\":" + String(settings->crashcounter) + ",";  // Crashcounter hinzugefügt
     json += "\"lastUpdateTime\":" + String(settings->lastUpdateTime);  // Füge die Laufzeit hinzu
     json += "}";
 

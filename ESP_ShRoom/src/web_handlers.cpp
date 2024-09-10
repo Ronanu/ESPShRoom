@@ -32,7 +32,7 @@ void handleSetTime(Settings* settings, WebServer& server, Preferences* preferenc
 }
 
 
-// ### Set-Values-Handler ###
+// ### Settings-Handler ###
 
 void handleSetValuesPage(Settings* settings, WebServer& server) {
     String html = "<html><body>";
@@ -55,28 +55,32 @@ void handleSetValuesPage(Settings* settings, WebServer& server) {
     html += "Aktive Laufzeit (in Sekunden): ";
     html += "<input type=\"number\" name=\"onTime1\" value=\"" + String(settings->onTime1) + "\" min=\"0\"><br>";
     html += "Zyklusanteil (in Prozent): ";
-    html += "<input type=\"number\" name=\"onPercentage1\" value=\"" + String(settings->onPercentage1) + "\" min=\"0\" max=\"100\"><br><br>";
+    html += "<input type=\"number\" name=\"onPercentage1\" value=\"" + String(settings->onPercentage1) + "\" min=\"0\" max=\"100\"><br>";
+    html += "Aktiviert: <input type=\"checkbox\" name=\"isEnabled1\" " + String(settings->isEnabled1 ? "checked" : "") + "><br><br>";
 
     // Lüfter 2
     html += "<h3>L&uuml;fter 2</h3>";
     html += "Aktive Laufzeit (in Sekunden): ";
     html += "<input type=\"number\" name=\"onTime2\" value=\"" + String(settings->onTime2) + "\" min=\"0\"><br>";
     html += "Zyklusanteil (in Prozent): ";
-    html += "<input type=\"number\" name=\"onPercentage2\" value=\"" + String(settings->onPercentage2) + "\" min=\"0\" max=\"100\"><br><br>";
+    html += "<input type=\"number\" name=\"onPercentage2\" value=\"" + String(settings->onPercentage2) + "\" min=\"0\" max=\"100\"><br>";
+    html += "Aktiviert: <input type=\"checkbox\" name=\"isEnabled2\" " + String(settings->isEnabled2 ? "checked" : "") + "><br><br>";
 
-    // Steckdose 1 (ehemals Lüfter 3)
-    html += "<h3>Steckdose 1</h3>";
+    // Steckdose 1
+    html += "<h3>Steckdose 1: Temperaturregler</h3>";
     html += "Aktive Laufzeit (in Sekunden): ";
     html += "<input type=\"number\" name=\"onTime3\" value=\"" + String(settings->onTime3) + "\" min=\"0\"><br>";
     html += "Zyklusanteil (in Prozent): ";
-    html += "<input type=\"number\" name=\"onPercentage3\" value=\"" + String(settings->onPercentage3) + "\" min=\"0\" max=\"100\"><br><br>";
+    html += "<input type=\"number\" name=\"onPercentage3\" value=\"" + String(settings->onPercentage3) + "\" min=\"0\" max=\"100\"><br>";
+    // html += "Aktiviert: <input type=\"checkbox\" name=\"isEnabled3\" " + String(settings->isEnabled3 ? "checked" : "") + "><br><br>";
 
-    // Steckdose 2 (ehemals Lüfter 4)
+    // Steckdose 2
     html += "<h3>Steckdose 2</h3>";
     html += "Aktive Laufzeit (in Sekunden): ";
     html += "<input type=\"number\" name=\"onTime4\" value=\"" + String(settings->onTime4) + "\" min=\"0\"><br>";
     html += "Zyklusanteil (in Prozent): ";
-    html += "<input type=\"number\" name=\"onPercentage4\" value=\"" + String(settings->onPercentage4) + "\" min=\"0\" max=\"100\"><br><br>";
+    html += "<input type=\"number\" name=\"onPercentage4\" value=\"" + String(settings->onPercentage4) + "\" min=\"0\" max=\"100\"><br>";
+    html += "Aktiviert: <input type=\"checkbox\" name=\"isEnabled4\" " + String(settings->isEnabled4 ? "checked" : "") + "><br><br>";
 
     html += "<input type=\"submit\" value=\"speichern\"><br><br>";  // Submit-Button für Aktoreinstellungen
     html += "</form>";
@@ -84,6 +88,7 @@ void handleSetValuesPage(Settings* settings, WebServer& server) {
 
     server.send(200, "text/html", html);
 }
+
 
 void handleSetValues(Settings* settings, WebServer& server, Preferences* preferences) {
     if (server.hasArg("onTime1")) {
@@ -125,10 +130,15 @@ void handleSetValues(Settings* settings, WebServer& server, Preferences* prefere
     if (server.hasArg("hysteresis")) {
         settings->hysteresis = server.arg("hysteresis").toFloat();
     }
-      
+
+    // Verarbeiten der neuen isEnabled-Flags
+    settings->isEnabled1 = server.hasArg("isEnabled1");
+    settings->isEnabled2 = server.hasArg("isEnabled2");
+    settings->isEnabled3 = server.hasArg("isEnabled3");
+    settings->isEnabled4 = server.hasArg("isEnabled4");
+
     server.sendHeader("Location", "/"); // Umleitung zur Root-Seite
     server.send(303); // 303 Redirect
     
     saveCurrentSettings(*settings, preferences);  
 }
-

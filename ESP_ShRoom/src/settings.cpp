@@ -44,6 +44,11 @@ void saveCurrentSettings(Settings settings, Preferences* preferences) {
     preferences->putInt("onTime3", settings.onTime3);
     preferences->putInt("onTime4", settings.onTime4);
 
+    preferences->putInt("isEnabled1", settings.isEnabled1);
+    preferences->putInt("isEnabled2", settings.isEnabled2);
+    preferences->putInt("isEnabled3", settings.isEnabled3);
+    preferences->putInt("isEnabled4", settings.isEnabled4);
+
     preferences->putInt("onPercentage1", settings.onPercentage1);
     preferences->putInt("onPercentage2", settings.onPercentage2);
     preferences->putInt("onPercentage3", settings.onPercentage3);
@@ -63,6 +68,11 @@ void loadSettings(Settings* settings, Preferences* preferences) {
     settings->onTime2 = preferences->getInt("onTime2", 10);
     settings->onTime3 = preferences->getInt("onTime3", 10);
     settings->onTime4 = preferences->getInt("onTime4", 10);
+
+    settings->isEnabled1 = preferences->getInt("isEnabled1", 0);
+    settings->isEnabled2 = preferences->getInt("isEnabled2", 0);
+    settings->isEnabled3 = preferences->getInt("isEnabled3", 0);
+    settings->isEnabled4 = preferences->getInt("isEnabled4", 0);
 
     settings->onPercentage1 = preferences->getInt("onPercentage1", 0);
     settings->onPercentage2 = preferences->getInt("onPercentage2", 0);
