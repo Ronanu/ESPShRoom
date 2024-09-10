@@ -41,7 +41,6 @@ void updateTime(Settings* settings, Preferences* preferences) {
 
     // Modulo-Operator, um zu prüfen, ob eine Sekunde vergangen ist
     if (currentMillis - settings->lastUpdateTime >= 1000) { 
-        settings->lastUpdateTime = millis();
         settings->seconds++;
 
         if (settings->seconds >= 60) {
@@ -78,6 +77,8 @@ void saveCurrentSettings(Settings* settings, Preferences* preferences) {
     preferences->putFloat("hysteresis", settings->hysteresis);
     preferences->putInt("hours", settings->hours);
     preferences->putInt("minutes", settings->minutes);
+    preferences->putInt("seconds", settings->seconds);
+    preferences->putInt("crashcounter", settings->crashcounter);
     Serial.println("Werte gespeichert!");
 }
 
@@ -87,17 +88,20 @@ void loadSettings(Settings* settings, Preferences* preferences) {
     settings->onTime3 = preferences->getInt("onTime3", 10);
     settings->onTime4 = preferences->getInt("onTime4", 10);
 
-    settings->onPercentage1 = preferences->getInt("onPercentage1", 50);
-    settings->onPercentage2 = preferences->getInt("onPercentage2", 50);
-    settings->onPercentage3 = preferences->getInt("onPercentage3", 50);
-    settings->onPercentage4 = preferences->getInt("onPercentage4", 50);
+    settings->onPercentage1 = preferences->getInt("onPercentage1", 0);
+    settings->onPercentage2 = preferences->getInt("onPercentage2", 0);
+    settings->onPercentage3 = preferences->getInt("onPercentage3", 0);
+    settings->onPercentage4 = preferences->getInt("onPercentage4", 0);
 
     settings->targetTemperature = preferences->getFloat("targetTemp", 22.0);
-    settings->hysteresis = preferences->getFloat("hysteresis", 1.0);
+    settings->hysteresis = preferences->getFloat("hysteresis", 0.5);
 
     settings->hours = preferences->getInt("hours", 0);
     settings->minutes = preferences->getInt("minutes", 0);
-    settings->seconds = 0;  // Sekunden zurücksetzen
+    settings->seconds = preferences->getInt("seconds", 0);
+
+    settings->crashcounter = preferences->getInt("crashcounter", 0);
+
     Serial.println("Werte geladen!");
 }
 
@@ -108,35 +112,7 @@ void handleSetValuesPage(Settings* settings, WebServer& server) {
     html += "<h1>Sollwerte umstellen</h1>";
     html += "<form action=\"/update_values\" method=\"POST\">";
 
-    // Lüfter 1
-    html += "<h2>L&uuml;fter 1</h2>";
-    html += "Aktive Laufzeit (in Sekunden): ";
-    html += "<input type=\"number\" name=\"onTime1\" value=\"" + String(settings->onTime1) + "\" min=\"0\"><br>";
-    html += "Zyklusanteil (in Prozent): ";
-    html += "<input type=\"number\" name=\"onPercentage1\" value=\"" + String(settings->onPercentage1) + "\" min=\"0\" max=\"100\"><br><br>";
-
-    // Lüfter 2
-    html += "<h2>L&uuml;fter 2</h2>";
-    html += "Aktive Laufzeit (in Sekunden): ";
-    html += "<input type=\"number\" name=\"onTime2\" value=\"" + String(settings->onTime2) + "\" min=\"0\"><br>";
-    html += "Zyklusanteil (in Prozent): ";
-    html += "<input type=\"number\" name=\"onPercentage2\" value=\"" + String(settings->onPercentage2) + "\" min=\"0\" max=\"100\"><br><br>";
-
-    // Steckdose 1 (ehemals Lüfter 3)
-    html += "<h2>Steckdose 1</h2>";
-    html += "Aktive Laufzeit (in Sekunden): ";
-    html += "<input type=\"number\" name=\"onTime3\" value=\"" + String(settings->onTime3) + "\" min=\"0\"><br>";
-    html += "Zyklusanteil (in Prozent): ";
-    html += "<input type=\"number\" name=\"onPercentage3\" value=\"" + String(settings->onPercentage3) + "\" min=\"0\" max=\"100\"><br><br>";
-
-    // Steckdose 2 (ehemals Lüfter 4)
-    html += "<h2>Steckdose 2</h2>";
-    html += "Aktive Laufzeit (in Sekunden): ";
-    html += "<input type=\"number\" name=\"onTime4\" value=\"" + String(settings->onTime4) + "\" min=\"0\"><br>";
-    html += "Zyklusanteil (in Prozent): ";
-    html += "<input type=\"number\" name=\"onPercentage4\" value=\"" + String(settings->onPercentage4) + "\" min=\"0\" max=\"100\"><br><br>";
-
-    // Soll-Temperatur
+        // Soll-Temperatur
     html += "<h2>Temperaturregler</h2>";
     html += "Soll-Temperatur (in &deg;C): ";
     html += "<input type=\"number\" name=\"targetTemp\" value=\"" + String(settings->targetTemperature, 1) + "\" step=\"0.1\"><br><br>";
@@ -146,6 +122,38 @@ void handleSetValuesPage(Settings* settings, WebServer& server) {
     html += "<input type=\"submit\" value=\"Werte setzen\">";
     html += "</form>";
     html += "</body></html>";
+
+    // Aktoren
+
+    html += "<h2>Aktoren umstellen</h2>";
+
+    // Lüfter 1
+    html += "<h3>L&uuml;fter 1</h3>";
+    html += "Aktive Laufzeit (in Sekunden): ";
+    html += "<input type=\"number\" name=\"onTime1\" value=\"" + String(settings->onTime1) + "\" min=\"0\"><br>";
+    html += "Zyklusanteil (in Prozent): ";
+    html += "<input type=\"number\" name=\"onPercentage1\" value=\"" + String(settings->onPercentage1) + "\" min=\"0\" max=\"100\"><br><br>";
+
+    // Lüfter 2
+    html += "<h3>L&uuml;fter 2</h3>";
+    html += "Aktive Laufzeit (in Sekunden): ";
+    html += "<input type=\"number\" name=\"onTime2\" value=\"" + String(settings->onTime2) + "\" min=\"0\"><br>";
+    html += "Zyklusanteil (in Prozent): ";
+    html += "<input type=\"number\" name=\"onPercentage2\" value=\"" + String(settings->onPercentage2) + "\" min=\"0\" max=\"100\"><br><br>";
+
+    // Steckdose 1 (ehemals Lüfter 3)
+    html += "<h3>Steckdose 1</h3>";
+    html += "Aktive Laufzeit (in Sekunden): ";
+    html += "<input type=\"number\" name=\"onTime3\" value=\"" + String(settings->onTime3) + "\" min=\"0\"><br>";
+    html += "Zyklusanteil (in Prozent): ";
+    html += "<input type=\"number\" name=\"onPercentage3\" value=\"" + String(settings->onPercentage3) + "\" min=\"0\" max=\"100\"><br><br>";
+
+    // Steckdose 2 (ehemals Lüfter 4)
+    html += "<h3>Steckdose 2</h3>";
+    html += "Aktive Laufzeit (in Sekunden): ";
+    html += "<input type=\"number\" name=\"onTime4\" value=\"" + String(settings->onTime4) + "\" min=\"0\"><br>";
+    html += "Zyklusanteil (in Prozent): ";
+    html += "<input type=\"number\" name=\"onPercentage4\" value=\"" + String(settings->onPercentage4) + "\" min=\"0\" max=\"100\"><br><br>";
 
     server.send(200, "text/html", html);
 }
