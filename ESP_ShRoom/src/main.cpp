@@ -12,7 +12,7 @@
 
 // Sensor-Instanzen
 SHT20Sensor sht20_1(18, 19, Wire);  // Sensor 1 an Pin 18, 19
-//SHT20Sensor sht20_2(21, 22, Wire1);  // Sensor 2 an Pin 21, 22
+SHT20Sensor sht20_2(21, 22, Wire1);  // Sensor 2 an Pin 21, 22
 
 // Globales Settings-Objekt
 Settings settings;
@@ -44,11 +44,11 @@ void setup() {
         } else {
             Serial.println("Sensor 1 erfolgreich initialisiert.");
         }
-    //if (!sht20_2.begin()) {
-    //        Serial.println("Maximale Anzahl von Versuchen erreicht, Sensor 2 konnte nicht verbunden werden.");
-    //    } else {
-    //        Serial.println("Sensor 2 erfolgreich initialisiert.");
-    //   }
+    if (!sht20_2.begin()) {
+            Serial.println("Maximale Anzahl von Versuchen erreicht, Sensor 2 konnte nicht verbunden werden.");
+        } else {
+            Serial.println("Sensor 2 erfolgreich initialisiert.");
+        }
     
     // Konfiguration des ESP32 als Access Point
     WiFi.softAP(ssid, password);
@@ -85,9 +85,9 @@ void loop() {
     settings.lastUpdateTime = start;
     //Sensordaten aktualisieren
     settings.temperature1 = sht20_1.getTemperature();
-    //settings.temperature2 = sht20_2.getTemperature();
+    settings.temperature2 = sht20_2.getTemperature();
     settings.humidity1 = sht20_1.getHumidity();
-    //settings.humidity2 = sht20_2.getHumidity();
+    settings.humidity2 = sht20_2.getHumidity();
 
     // Uhrzeit aktualisieren
     offline_clock.updateTime();

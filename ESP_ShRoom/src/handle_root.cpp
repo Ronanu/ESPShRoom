@@ -27,7 +27,9 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "<div class='sensor-data'>";
     html += "<h3>Sensordaten</h3>";
     html += "<strong>Temperatur 1: </strong> <span id='temperature1'>" + String(settings->temperature1, 3) + "</span> &deg;C<br>";  // Temperatur ID
+    html += "<strong>Temperatur 2: </strong> <span id='temperature1'>" + String(settings->temperature2, 3) + "</span> &deg;C<br>";  // Temperatur ID
     html += "<strong>Luftfeuchtigkeit 1: </strong> <span id='humidity1'>" + String(settings->humidity1, 3) + "</span> %<br>";  // Luftfeuchtigkeit ID
+    html += "<strong>Luftfeuchtigkeit 2: </strong> <span id='humidity1'>" + String(settings->humidity2, 3) + "</span> %<br>";  // Luftfeuchtigkeit ID    
     html += "</div>";
 
     // Überschrift: Sollzustände
