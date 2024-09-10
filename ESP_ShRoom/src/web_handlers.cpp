@@ -23,7 +23,7 @@ void handleSetTime(Settings* settings, WebServer& server, Preferences* preferenc
         settings->hours = server.arg("hour").toInt();
         settings->minutes = server.arg("minute").toInt();
         settings->seconds = 0; // Sekunden auf 0 setzen
-        settings->lastUpdateTime = millis(); // Startzeitpunkt speichern
+        
 
         // Speichere die neuen Uhrzeit-Werte sofort
         saveCurrentSettings(settings, preferences);
@@ -42,23 +42,26 @@ void handleTime(Settings* settings, WebServer& server) {
 
 void updateTime(Settings* settings, Preferences* preferences) {
     unsigned long currentMillis = millis();
-    if (currentMillis - settings->lastSavedMinute >= 1000) { // Eine Sekunde vergangen?
+
+    // Modulo-Operator, um zu prüfen, ob eine Sekunde vergangen ist
+    if (currentMillis - settings->lastUpdateTime >= 1000) { 
+        settings->lastUpdateTime = millis();
         settings->seconds++;
+
         if (settings->seconds >= 60) {
             settings->seconds = 0;
             settings->minutes++;
+            // Werte speichern, wenn sich die Minute ändert
+            saveCurrentSettings(settings, preferences);
+
             if (settings->minutes >= 60) {
                 settings->minutes = 0;
                 settings->hours++;
+
                 if (settings->hours >= 24) {
                     settings->hours = 0;
                 }
             }
-        }
-        // Speichere die Werte, wenn sich die Minute ändert
-        if (settings->minutes != settings->lastSavedMinute) {
-            saveCurrentSettings(settings, preferences);
-            settings->lastSavedMinute = settings->minutes;
         }
     }
 }
@@ -75,7 +78,8 @@ void saveCurrentSettings(Settings* settings, Preferences* preferences) {
     preferences->putInt("onPercentage3", settings->onPercentage3);
     preferences->putInt("onPercentage4", settings->onPercentage4);
 
-    preferences->putFloat("targetTemperature", settings->targetTemperature);
+    preferences->putFloat("targetTemp", settings->targetTemperature);
+    preferences->putFloat("hysteresis", settings->hysteresis);
     preferences->putInt("hours", settings->hours);
     preferences->putInt("minutes", settings->minutes);
     Serial.println("Werte gespeichert!");
@@ -92,11 +96,12 @@ void loadSettings(Settings* settings, Preferences* preferences) {
     settings->onPercentage3 = preferences->getInt("onPercentage3", 50);
     settings->onPercentage4 = preferences->getInt("onPercentage4", 50);
 
-    settings->targetTemperature = preferences->getFloat("targetTemperature", 22.0);
+    settings->targetTemperature = preferences->getFloat("targetTemp", 22.0);
+    settings->hysteresis = preferences->getFloat("hysteresis", 1.0);
+
     settings->hours = preferences->getInt("hours", 0);
     settings->minutes = preferences->getInt("minutes", 0);
     settings->seconds = 0;  // Sekunden zurücksetzen
-    settings->lastSavedMinute = settings->minutes;  // Initialisiere die letzte gespeicherte Minute
     Serial.println("Werte geladen!");
 }
 
@@ -136,9 +141,11 @@ void handleSetValuesPage(Settings* settings, WebServer& server) {
     html += "<input type=\"number\" name=\"onPercentage4\" value=\"" + String(settings->onPercentage4) + "\" min=\"0\" max=\"100\"><br><br>";
 
     // Soll-Temperatur
-    html += "<h2>Soll-Temperatur</h2>";
+    html += "<h2>Temperaturregler</h2>";
     html += "Soll-Temperatur (in &deg;C): ";
     html += "<input type=\"number\" name=\"targetTemp\" value=\"" + String(settings->targetTemperature, 1) + "\" step=\"0.1\"><br><br>";
+    html += "Hysterese (in &deg;C): ";
+    html += "<input type=\"number\" name=\"hysteresis\" value=\"" + String(settings->hysteresis, 2) + "\" step=\"0.1\"><br><br>";
 
     html += "<input type=\"submit\" value=\"Werte setzen\">";
     html += "</form>";
@@ -182,6 +189,10 @@ void handleSetValues(Settings* settings, WebServer& server, Preferences* prefere
 
     if (server.hasArg("targetTemp")) {
         settings->targetTemperature = server.arg("targetTemp").toFloat();
+    }
+
+    if (server.hasArg("hysteresis")) {
+        settings->hysteresis = server.arg("hysteresis").toFloat();
     }
 
     // Speichere die neuen Werte sofort

@@ -10,9 +10,9 @@ bool SHT20Sensor::begin() {
     _wireBus.begin(_sdaPin, _sclPin, 9600);
     
     // Initialisiere den uFire SHT20 Sensor auf dem entsprechenden I²C-Bus
-    for (int i = 0; i < 5 && !sht20.begin(SHT20_RESOLUTION_12BITS, SHT20_I2C, _wireBus); i++) {
+    for (int i = 0; i < 2 && !sht20.begin(SHT20_RESOLUTION_12BITS, SHT20_I2C, _wireBus); i++) {
         Serial.println("Sensor nicht gefunden, überprüfe die Verkabelung!");
-        delay(500);  // Warte eine halbe Sekunde
+        delay(50);  // Warte eine halbe Sekunde
     }
     
     return sht20.begin(SHT20_RESOLUTION_12BITS, SHT20_I2C, _wireBus);
@@ -20,10 +20,21 @@ bool SHT20Sensor::begin() {
 
 // Methode zum Abrufen der Temperatur
 float SHT20Sensor::getTemperature() {
-    return sht20.temperature();
+    if (sht20.connected()) {
+        return sht20.temperature();
+    }
+    else {
+        return -1;
+    }
+
 }
 
 // Methode zum Abrufen der Luftfeuchtigkeit
 float SHT20Sensor::getHumidity() {
-    return sht20.humidity();
+    if (sht20.connected()) {
+        return sht20.humidity();
+    }
+    else {
+        return -1;
+    }
 }

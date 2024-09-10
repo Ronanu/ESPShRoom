@@ -19,13 +19,12 @@ struct Settings {
 
     // TemperatureControlSettings
     float targetTemperature;    
+    float hysteresis;
 
     // TimeSettings
     int hours;
     int minutes;
     int seconds;
-
-    int lastSavedMinute;
     int lastUpdateTime;
 
     // SensorSettings
@@ -34,5 +33,7 @@ struct Settings {
     float humidity1;
     float humidity2;
 };
+
+void printSettings(const Settings& settings);
 
 #endif  // Beendet den Include-Guard

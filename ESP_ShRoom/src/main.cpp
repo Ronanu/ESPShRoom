@@ -8,6 +8,7 @@
 #include "web_handlers.h"
 #include "handle_root.h"
 #include "SHT20Sensor.h"
+#include "Temperaturecontroller.h"
 
 // Sensor-Instanzen
 SHT20Sensor sht20_1(18, 19, Wire);  // Sensor 1 an Pin 18, 19
@@ -30,6 +31,12 @@ FanControl* fanControl1;
 FanControl* fanControl2;
 FanControl* fanControl3;
 FanControl* fanControl4;
+
+TemperatureController tempcontr1(& settings.targetTemperature, & settings.hysteresis, & settings.isEnabled3);
+
+
+
+
 
 void setup() {
     Serial.begin(115200);
@@ -88,11 +95,11 @@ void loop() {
     //settings.temperature2 = sht20_2.getTemperature();
     settings.humidity1 = sht20_1.getHumidity();
     //settings.humidity2 = sht20_2.getHumidity();
-
+    tempcontr1.update(settings.temperature1);
     // Uhrzeit aktualisieren
-    updateTime(&settings, &preferences);
-    Serial.println("Temperatur 1: " + String(settings.temperature1, 1) + " °C, Luftfeuchtigkeit 1: " + String(settings.humidity1, 1) + " %");
-    //Serial.println("Temperatur 2: " + String(settings.temperature2, 1) + " °C, Luftfeuchtigkeit 2: " + String(humidity2, 1) + " %");
+    updateTime(&settings, &preferences);    
+    // Webserver anfragen bearbeiten
+    server.handleClient();
 
     // Aktualisiere den Lüfterstatus für alle vier Lüfter
     fanControl1->update();
@@ -100,7 +107,6 @@ void loop() {
     fanControl3->update();
     fanControl4->update();
 
-    // Webserver anfragen bearbeiten
-    server.handleClient();
-    Serial.println("Loop time: " + String(millis() - start) + " ms");
+    Serial.println("\n\n\nLoop time: " + String(millis() - start) + " ms");
+    printSettings(settings);
 }
