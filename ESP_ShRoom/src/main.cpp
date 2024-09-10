@@ -63,7 +63,6 @@ void setup() {
     preferences.begin("my-app", false);
     loadSettings(&settings, &preferences);
 
-    // Webserver Routen
     server.on("/", [&]() { handleRoot(&settings, server); });
     server.on("/setTime", [&]() { handleSetTimePage(&settings, server); });
     server.on("/set_values", [&]() { handleSetValuesPage(&settings, server); });

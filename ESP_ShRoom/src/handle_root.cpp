@@ -4,31 +4,37 @@
 void handleRoot(Settings* settings, WebServer& server) {
     String html = "<!DOCTYPE html><html lang='de'><head>";
     html += "<meta charset='UTF-8'>";
-    html += "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
+    html += "<meta name='viewport' content='width=device-width, initial-scale=1.25'>";
     html += "<title>ESP32 Steuerung</title>";
     html += "<link href='https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css' rel='stylesheet'>";
     html += "<style>";
     html += "body { padding: 20px; }";
     html += ".sensor-data { margin-top: 20px; }";
     html += ".btn { margin-top: 10px; }";
+    html += ".runtime { text-align: center; font-size: small; }";  // Stile für Runtime
     html += "</style>";
     html += "</head><body>";
     html += "<div class='container'>";
+    
+    // Überschrift
     html += "<h1 class='text-center'>ESP32 Steuerung</h1>";
+
+    // Ausgabe der Runtime direkt nach der Überschrift
+    html += "<div class='runtime'>Laufzeit: <span id='lastUpdateTime'>" + String(settings->lastUpdateTime) + "</span> ms</div><br>";  // ID für lastUpdateTime bleibt unverändert
 
     // Ausgabe der aktuellen Sensordaten
     html += "<h2>Sensordaten</h2>";
     html += "<div class='sensor-data'>";
-    html += "<strong>Temperatur 1:</strong> <span id='temperature1'>" + String(settings->temperature1, 1) + "</span> &deg;C<br>";
-    html += "<strong>Luftfeuchtigkeit 1:</strong> <span id='humidity1'>" + String(settings->humidity1, 1) + "</span> %<br>";
+    html += "<strong>Temperatur 1:</strong> <span id='temperature1'>" + String(settings->temperature1, 3) + "</span> &deg;C<br>";  // Temperatur ID
+    html += "<strong>Luftfeuchtigkeit 1:</strong> <span id='humidity1'>" + String(settings->humidity1, 3) + "</span> %<br>";  // Luftfeuchtigkeit ID
     html += "</div>";
 
     // Anzeige der aktuellen Lüfterlaufzeit und Zyklusanteil
     html += "<h2>Aktuelle Sollwerte</h2>";
     html += "<div class='sensor-data'>";
     html += "<strong>L&uuml;fter 1:</strong><br>";
-    html += "Aktive Laufzeit: <span id='onTime1'>" + String(settings->onTime1) + "</span> Sekunden<br>";
-    html += "Zyklusanteil: <span id='onPercentage1'>" + String(settings->onPercentage1) + "</span> %<br><br>";
+    html += "Aktive Laufzeit: <span id='onTime1'>" + String(settings->onTime1) + "</span> Sekunden<br>";  // Lüfter 1 Laufzeit ID
+    html += "Zyklusanteil: <span id='onPercentage1'>" + String(settings->onPercentage1) + "</span> %<br><br>";  // Lüfter 1 Zyklusanteil ID
 
     html += "<strong>L&uuml;fter 2:</strong><br>";
     html += "Aktive Laufzeit: <span id='onTime2'>" + String(settings->onTime2) + "</span> Sekunden<br>";
@@ -44,13 +50,17 @@ void handleRoot(Settings* settings, WebServer& server) {
 
     html += "<strong>Temperaturregler:</strong><br>";
     html += "Soll-Temperatur: <span id='targetTemperature'>" + String(settings->targetTemperature, 1) + "</span> &deg;C<br>";
-    html += "Hyterese: " + String(settings->hysteresis, 2) + " &deg;C<br><br>";
+    html += "Hyterese: <span id='hysteresis'>" + String(settings->hysteresis, 2) + "</span> &deg;C<br><br>";  // ID für Hysterese hinzugefügt
     html += "<a href=\"/set_values\" class='btn btn-secondary'>Sollwerte umstellen</a>";
     html += "</div>";
 
-    // Uhranzeige basierend auf den Settings
+    // Uhranzeige am Ende der Seite
     html += "<h2>Aktuelle Uhrzeit</h2>";
-    html += "<div id='time' class='alert alert-info text-center'></div>"; // Kein vorgefertigter Wert mehr hier
+    html += "<div class='alert alert-info text-center'>";
+    html += "Stunden: <span id='hours'>" + String(settings->hours) + "</span><br>";  // Stunden-ID hinzugefügt
+    html += "Minuten: <span id='minutes'>" + String(settings->minutes) + "</span><br>";  // Minuten-ID hinzugefügt
+    html += "Sekunden: <span id='seconds'>" + String(settings->seconds) + "</span>";  // Sekunden-ID hinzugefügt
+    html += "</div>";
 
     html += "<a href=\"/setTime\" class='btn btn-primary'>Uhrzeit einstellen</a>";
 
@@ -74,13 +84,18 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "      document.getElementById('temperature2').innerHTML = data.temperature2;";
     html += "      document.getElementById('humidity1').innerHTML = data.humidity1;";
     html += "      document.getElementById('humidity2').innerHTML = data.humidity2;";
-    html += "      document.getElementById('time').innerHTML = data.hours + ':' + (data.minutes < 10 ? '0' : '') + data.minutes + ':' + (data.seconds < 10 ? '0' : '') + data.seconds;";
+
+    // Aktualisiere Stunden, Minuten, Sekunden und die LastUpdateTime
+    html += "      document.getElementById('hours').innerHTML = data.hours;";
+    html += "      document.getElementById('minutes').innerHTML = data.minutes;";
+    html += "      document.getElementById('seconds').innerHTML = data.seconds;";
+    html += "      document.getElementById('lastUpdateTime').innerHTML = data.lastUpdateTime;";
     html += "    }";
     html += "  };";
     html += "  xhr.open('GET', '/updateData', true);";
     html += "  xhr.send();";
     html += "}";
-    html += "setInterval(updateData, 5000);";  // Aktualisierung alle 5 Sekunden
+    html += "setInterval(updateData, 500);";  // Aktualisierung alle .5 Sekunden
     html += "</script>";
 
     html += "</div></body></html>";
@@ -106,7 +121,8 @@ void handleUpdateData(Settings* settings, WebServer& server) {
     json += "\"humidity2\":" + String(settings->humidity2, 1) + ",";
     json += "\"hours\":" + String(settings->hours) + ",";
     json += "\"minutes\":" + String(settings->minutes) + ",";
-    json += "\"seconds\":" + String(settings->seconds);
+    json += "\"seconds\":" + String(settings->seconds) + ",";
+    json += "\"lastUpdateTime\":" + String(settings->lastUpdateTime);  // Füge die Laufzeit hinzu
     json += "}";
 
     server.send(200, "application/json", json);
