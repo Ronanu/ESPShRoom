@@ -39,7 +39,7 @@ void handleSetValuesPage(Settings* settings, WebServer& server) {
     html += "<h1>Sollwerte umstellen</h1>";
     html += "<form action=\"/update_values\" method=\"POST\">";
 
-        // Soll-Temperatur
+    // Soll-Temperatur
     html += "<h2>Temperaturregler</h2>";
     html += "Soll-Temperatur (in &deg;C): ";
     html += "<input type=\"number\" name=\"targetTemp\" value=\"" + String(settings->targetTemperature, 1) + "\" step=\"0.1\"><br><br>";
@@ -78,7 +78,9 @@ void handleSetValuesPage(Settings* settings, WebServer& server) {
     html += "Zyklusanteil (in Prozent): ";
     html += "<input type=\"number\" name=\"onPercentage4\" value=\"" + String(settings->onPercentage4) + "\" min=\"0\" max=\"100\"><br><br>";
 
-    html += "<a href=\"/update_values\" class='btn btn-secondary'>speichern</a><br><br>";  // Button für Aktoreinstellungen
+    html += "<input type=\"submit\" value=\"speichern\"><br><br>";  // Submit-Button für Aktoreinstellungen
+    html += "</form>";
+    html += "</body></html>";
 
     server.send(200, "text/html", html);
 }
