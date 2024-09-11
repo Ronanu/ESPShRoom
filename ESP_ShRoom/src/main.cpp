@@ -80,7 +80,8 @@ void setup() {
 
     server.on("/", [&]() { handleRoot(&settings, server); });
     server.on("/setTime", [&]() { handleSetTimePage(&settings, server); });
-    server.on("/set_values", [&]() { handleSetValuesPage(&settings, server); });
+    server.on("/set_values", [&]() { showSetValuesPage(&settings, server); });
+    server.on("/help", [&]() { showHelpPage(&settings, server); });
     server.on("/updateData", [&]() { handleUpdateData(&settings, server); });
     server.on("/updateTime", [&]() { handleSetTime(&settings, server, &preferences); });
     server.on("/update_values", [&]() { handleSetValues(&settings, server, &preferences); });

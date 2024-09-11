@@ -38,7 +38,9 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "<h3>Sollzustände</h3>";
     html += "<strong>Soll-Temperatur:\t</strong> <span id='targetTemperature'>" + String(settings->targetTemperature, 1) + "</span> &deg;C<br>";
     html += "<strong>Hysterese:\t</strong> <span id='hysteresis'>" + String(settings->hysteresis, 2) + "</span> &deg;C<br><br>";  // Hysterese fett
-    html += "<a href=\"/set_values\" class='btn btn-secondary'>Einstellungen</a><br><br>";  // Button für Einstellungen unter Temperaturregler
+
+    html += "<a href=\"/set_values\" class='btn btn-secondary'>Einstellungen</a> ";
+    html += "<a href=\"/help\" class='btn btn-info'>Hilfe</a><br><br>";  // Button für Hilfe
 
     // Überschrift: Aktoreinstellungen
     html += "<h2>Aktoreinstellungen</h2>";

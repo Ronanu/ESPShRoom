@@ -34,7 +34,7 @@ void handleSetTime(Settings* settings, WebServer& server, Preferences* preferenc
 
 // ### Settings-Handler ###
 
-void handleSetValuesPage(Settings* settings, WebServer& server) {
+void showSetValuesPage(Settings* settings, WebServer& server) {
     String html = "<html><body>";
     html += "<h1>Sollwerte umstellen</h1>";
     html += "<form action=\"/update_values\" method=\"POST\">";
