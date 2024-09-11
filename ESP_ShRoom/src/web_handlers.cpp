@@ -55,7 +55,7 @@ void showSetValuesPage(Settings* settings, WebServer& server) {
     html += "Aktive Laufzeit (in Sekunden): ";
     html += "<input type=\"number\" name=\"onTime1\" value=\"" + String(settings->onTime1) + "\" min=\"0\"><br>";
     html += "Zyklusanteil (in Prozent): ";
-    html += "<input type=\"number\" name=\"onPercentage1\" value=\"" + String(settings->onPercentage1) + "\" min=\"0\" max=\"100\"><br>";
+    html += "<input type=\"number\" name=\"onPercentage1\" value=\"" + String(settings->onPercentage1) + "\" min=\"5\" max=\"100\"><br>";
     html += "Aktiviert: <input type=\"checkbox\" name=\"isEnabled1\" " + String(settings->isEnabled1 ? "checked" : "") + "><br><br>";
 
     // Lüfter 2
@@ -63,7 +63,7 @@ void showSetValuesPage(Settings* settings, WebServer& server) {
     html += "Aktive Laufzeit (in Sekunden): ";
     html += "<input type=\"number\" name=\"onTime2\" value=\"" + String(settings->onTime2) + "\" min=\"0\"><br>";
     html += "Zyklusanteil (in Prozent): ";
-    html += "<input type=\"number\" name=\"onPercentage2\" value=\"" + String(settings->onPercentage2) + "\" min=\"0\" max=\"100\"><br>";
+    html += "<input type=\"number\" name=\"onPercentage2\" value=\"" + String(settings->onPercentage2) + "\" min=\"5\" max=\"100\"><br>";
     html += "Aktiviert: <input type=\"checkbox\" name=\"isEnabled2\" " + String(settings->isEnabled2 ? "checked" : "") + "><br><br>";
 
     // Steckdose 1
@@ -71,7 +71,7 @@ void showSetValuesPage(Settings* settings, WebServer& server) {
     html += "Aktive Laufzeit (in Sekunden): ";
     html += "<input type=\"number\" name=\"onTime3\" value=\"" + String(settings->onTime3) + "\" min=\"0\"><br>";
     html += "Zyklusanteil (in Prozent): ";
-    html += "<input type=\"number\" name=\"onPercentage3\" value=\"" + String(settings->onPercentage3) + "\" min=\"0\" max=\"100\"><br>";
+    html += "<input type=\"number\" name=\"onPercentage3\" value=\"" + String(settings->onPercentage3) + "\" min=\"5\" max=\"100\"><br>";
     // html += "Aktiviert: <input type=\"checkbox\" name=\"isEnabled3\" " + String(settings->isEnabled3 ? "checked" : "") + "><br><br>";
 
     // Steckdose 2
@@ -79,7 +79,7 @@ void showSetValuesPage(Settings* settings, WebServer& server) {
     html += "Aktive Laufzeit (in Sekunden): ";
     html += "<input type=\"number\" name=\"onTime4\" value=\"" + String(settings->onTime4) + "\" min=\"0\"><br>";
     html += "Zyklusanteil (in Prozent): ";
-    html += "<input type=\"number\" name=\"onPercentage4\" value=\"" + String(settings->onPercentage4) + "\" min=\"0\" max=\"100\"><br>";
+    html += "<input type=\"number\" name=\"onPercentage4\" value=\"" + String(settings->onPercentage4) + "\" min=\"5\" max=\"100\"><br>";
     html += "Aktiviert: <input type=\"checkbox\" name=\"isEnabled4\" " + String(settings->isEnabled4 ? "checked" : "") + "><br><br>";
 
     html += "<input type=\"submit\" value=\"speichern\"><br><br>";  // Submit-Button für Aktoreinstellungen

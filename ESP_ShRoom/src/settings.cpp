@@ -64,7 +64,7 @@ void saveCurrentSettings(Settings settings, Preferences* preferences) {
 }
 
 void loadSettings(Settings* settings, Preferences* preferences) {
-    settings->onTime1 = preferences->getInt("onTime1");
+    settings->onTime1 = preferences->getInt("onTime1", 10);
     settings->onTime2 = preferences->getInt("onTime2", 10);
     settings->onTime3 = preferences->getInt("onTime3", 10);
     settings->onTime4 = preferences->getInt("onTime4", 10);
@@ -74,13 +74,13 @@ void loadSettings(Settings* settings, Preferences* preferences) {
     settings->isEnabled3 = preferences->getInt("isEnabled3", 0);
     settings->isEnabled4 = preferences->getInt("isEnabled4", 0);
 
-    settings->onPercentage1 = preferences->getInt("onPercentage1", 0);
-    settings->onPercentage2 = preferences->getInt("onPercentage2", 0);
-    settings->onPercentage3 = preferences->getInt("onPercentage3", 0);
-    settings->onPercentage4 = preferences->getInt("onPercentage4", 0);
+    settings->onPercentage1 = preferences->getInt("onPercentage1", 100);
+    settings->onPercentage2 = preferences->getInt("onPercentage2", 100);
+    settings->onPercentage3 = preferences->getInt("onPercentage3", 100);
+    settings->onPercentage4 = preferences->getInt("onPercentage4", 100);
 
     settings->targetTemperature = preferences->getFloat("targetTemp", 22.0);
-    settings->hysteresis = preferences->getFloat("hysteresis", 0.5);
+    settings->hysteresis = preferences->getFloat("hysteresis", 0.3);
 
     settings->hours = preferences->getInt("hours", 0);
     settings->minutes = preferences->getInt("minutes", 0);
