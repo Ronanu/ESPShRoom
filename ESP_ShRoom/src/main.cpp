@@ -30,8 +30,8 @@ FanControl* fanControl2;
 FanControl* fanControl3;
 FanControl* fanControl4;
 
-TemperatureController tempcontr1(&settings.targetTemperature, &settings.hysteresis);
-ValueChecker valuechecker(5);
+HysteresisController tempcontr1(&settings.targetTemperature, &settings.hysteresis);
+FaultFilter faultfilter(5);
 OfflineClock offline_clock(&settings, &preferences);
 
 
@@ -115,7 +115,7 @@ void loop() {
 
     // Aktualisiere den Lüfterstatus für alle vier Lüfter
 
-    float lazy_temperature = valuechecker.checkValue(settings.temperature1);
+    float lazy_temperature = faultfilter.checkValue(settings.temperature1);
     settings.isEnabled3 = tempcontr1.update(settings.isEnabled3, lazy_temperature);
 
     fanControl1->update();

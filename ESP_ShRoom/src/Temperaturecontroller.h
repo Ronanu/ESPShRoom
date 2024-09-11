@@ -3,10 +3,10 @@
 
 #include <Arduino.h>
 // Temperaturcontroller-Klasse
-class TemperatureController {
+class HysteresisController {
 public:
     // Konstruktor, der die Adressen für Zieltemperatur, Hysterese und Heizungsstatus übergibt
-    TemperatureController(float* targetTemperature, float* hysteresis);
+    HysteresisController(float* targetTemperature, float* hysteresis);
 
     // Methode zum Aktualisieren des Heizungsstatus basierend auf der aktuellen Temperatur
     bool update(bool currentState, float currentTemperature);
@@ -22,14 +22,15 @@ private:
 #ifndef VALUECHECKER_H
 #define VALUECHECKER_H
 
-class ValueChecker {
+class FaultFilter {
 private:
+    float last_valid_value;  // Speichert den letzten gültigen Wert
     int counter;    // Zählt, wie oft der Wert -1 empfangen wurde
     int maxCount;   // Definiert, nach wie vielen -1 der Wert weitergegeben wird
 
 public:
     // Konstruktor, der MaxCount initialisiert
-    ValueChecker(int maxCountValue);
+    FaultFilter(int maxCountValue);
 
     // Methode, die überprüft, ob der Wert -1 ist
     float checkValue(float value);
