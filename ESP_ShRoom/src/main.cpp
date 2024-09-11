@@ -42,7 +42,7 @@ SpecialPwmControll* fanControl2;
 SpecialPwmControll* fanControl3;
 SpecialPwmControll* fanControl4;
 
-HysteresisController tempcontr1(&settings.targetTemperature, &settings.hysteresis);
+HysteresisController hysteresiscontroller(&settings.targetTemperature, &settings.hysteresis);
 FaultFilter faultfilter1(5);
 FaultFilter faultfilter2(5);
 OfflineClock offline_clock(&settings, &preferences);
@@ -130,7 +130,7 @@ void loop() {
     //##############################################################################################
     //##############################################################################################
     float lazy_temperature1 = faultfilter1.checkValue(settings.temperature1);
-    settings.isEnabled3 = tempcontr1.update(settings.isEnabled3, lazy_temperature1);
+    settings.isEnabled3 = hysteresiscontroller.update(settings.isEnabled3, lazy_temperature1);
 
     float lazy_temperature2 = faultfilter2.checkValue(settings.temperature2);
     settings.isEnabled1 = true;
@@ -142,7 +142,7 @@ void loop() {
         settings.onPercentage1 = 100;
     } else if (lazy_temperature2 > settings.targetTemperature + 4)  {
         settings.onPercentage1 = 100;
-        settings.isEnabled3 = false;
+        settings.isEnabled3 = false; // Temperaturbegrenzumg im Bauraum
     }
 
     //##############################################################################################
