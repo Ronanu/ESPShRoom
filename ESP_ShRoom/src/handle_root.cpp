@@ -21,7 +21,7 @@ void handleRoot(Settings* settings, WebServer& server) {
 
     // Ausgabe der Runtime direkt nach der Überschrift
     html += "<div class='runtime'>Laufzeit: <span id='lastUpdateTime'>" + String(settings->lastUpdateTime) + "</span> ms<br>";  // ID für lastUpdateTime bleibt unverändert
-    html += "<span id = 'crashcounter'>Crashcounter: " + String(settings->crashcounter) + "</span></div><br>";  // ID für crashcounter bleibt unverändert
+    html += "<div class='crashcounter'>Crashcounter: <span id = 'crashcounter'>" + String(settings->crashcounter) + "</span></div><br>";  // ID für crashcounter bleibt unverändert
 
     // Ausgabe der aktuellen Sensordaten
     html += "<div class='sensor-data'>";

@@ -53,22 +53,17 @@ void FanControl::update() {
 // Methode zum Umschalten des Lüfterstatus
 void FanControl::switchFan(bool state) {
     isFanOn = state;
-    delay(10);  // Verzögerung, um den Lüfter nicht zu schnell ein- und auszuschalten
     digitalWrite(pin, state ? LOW : HIGH);  // Lüfter an oder aus
-    delay(10);  // Verzögerung, um den Lüfter nicht zu schnell ein- und auszuschalten
 }
 
 // Berechnung der Ein- und Ausschaltdauer basierend auf der Gesamtdauer und der Einschaltdauer in Prozent
 void FanControl::calculateDurations() {
     onTimeMillis = (*onTimeAddr) * 1000;  // Gesamtdauer des Zyklus in Millisekunden
     if (*onPercentageAddr <= 0) {
-        //*enabledAddr = false;  // Lüfter ausschalten, wenn der Prozentsatz 0 oder negativ ist
     }
     else {
-        //*enabledAddr = true;  // Lüfter einschalten, wenn der Prozentsatz positiv ist
         int total_period = 100 * onTimeMillis / *onPercentageAddr;  // Gesamtdauer des Zyklus
         offTimeMillis = total_period - onTimeMillis;  // Pausenzeit ist der Rest der Zyklusdauer
     }
-    //onTimeMillis = 1000;  // Einschaltdauer ist 1 Sekunde
-    //offTimeMillis = 100;  // Pausenzeit ist 1 Sekunde
+
 }

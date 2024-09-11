@@ -1,6 +1,7 @@
 #ifndef TEMPERATURECONTROLLER_H
 #define TEMPERATURECONTROLLER_H
 
+#include <Arduino.h>
 // Temperaturcontroller-Klasse
 class TemperatureController {
 public:
@@ -17,3 +18,21 @@ private:
 };
 
 #endif // TEMPERATURECONTROLLER_H
+
+#ifndef VALUECHECKER_H
+#define VALUECHECKER_H
+
+class ValueChecker {
+private:
+    int counter;    // Zählt, wie oft der Wert -1 empfangen wurde
+    int maxCount;   // Definiert, nach wie vielen -1 der Wert weitergegeben wird
+
+public:
+    // Konstruktor, der MaxCount initialisiert
+    ValueChecker(int maxCountValue);
+
+    // Methode, die überprüft, ob der Wert -1 ist
+    float checkValue(float value);
+};
+
+#endif // VALUECHECKER_H
