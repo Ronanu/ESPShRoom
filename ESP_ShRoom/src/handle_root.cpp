@@ -20,16 +20,17 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "<h1 class='text-center'>ShRoom</h1>";
 
     // Ausgabe der Runtime direkt nach der Überschrift
-    html += "<div class='runtime'>Laufzeit: <span id='lastUpdateTime'>" + String(settings->lastUpdateTime) + "</span> ms<br>";  // ID für lastUpdateTime bleibt unverändert
+    html += "<div class='runtime'>";
+    html += "Laufzeit: <span id='lastUpdateTime'>" + String(settings->lastUpdateTime) + "</span> ms<br>";  // ID für lastUpdateTime bleibt unverändert
     html += "<div class='crashcounter'>Crashcounter: <span id = 'crashcounter'>" + String(settings->crashcounter) + "</span></div><br>";  // ID für crashcounter bleibt unverändert
 
     // Ausgabe der aktuellen Sensordaten
     html += "<div class='sensor-data'>";
     html += "<h3>Sensordaten</h3>";
     html += "<strong>Temperatur 1: </strong> <span id='temperature1'>" + String(settings->temperature1, 3) + "</span> &deg;C<br>";  // Temperatur ID
-    html += "<strong>Temperatur 2: </strong> <span id='temperature1'>" + String(settings->temperature2, 3) + "</span> &deg;C<br>";  // Temperatur ID
+    html += "<strong>Temperatur 2: </strong> <span id='temperature2'>" + String(settings->temperature2, 3) + "</span> &deg;C<br>";  // Temperatur ID
     html += "<strong>Luftfeuchtigkeit 1: </strong> <span id='humidity1'>" + String(settings->humidity1, 3) + "</span> %<br>";  // Luftfeuchtigkeit ID
-    html += "<strong>Luftfeuchtigkeit 2: </strong> <span id='humidity1'>" + String(settings->humidity2, 3) + "</span> %<br>";  // Luftfeuchtigkeit ID    
+    html += "<strong>Luftfeuchtigkeit 2: </strong> <span id='humidity2'>" + String(settings->humidity2, 3) + "</span> %<br>";  // Luftfeuchtigkeit ID    
     html += "</div>";
 
     // Überschrift: Sollzustände
@@ -68,8 +69,8 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "<h2>Aktuelle Uhrzeit</h2>";
     html += "<div class='alert alert-info text-center'>";
     html += "<span id='hours'>" + String(settings->hours) + "</span> : ";
-    html += "<span id='minutes'>" + String(settings->minutes < 10 ? "0" : "") + String(settings->minutes) + "</span> : ";
-    html += "<span id='seconds'>" + String(settings->seconds < 10 ? "0" : "") + String(settings->seconds) + "</span>";
+    html += "<span id='minutes'>" + String(settings->minutes) + "</span> : ";
+    html += "<span id='seconds'>" + String(settings->seconds) + "</span>";
     html += "</div>";
 
     html += "<a href=\"/setTime\" class='btn btn-secondary'>Einstellungen Uhr</a><br><br>";  // Button für Aktoreinstellungen
