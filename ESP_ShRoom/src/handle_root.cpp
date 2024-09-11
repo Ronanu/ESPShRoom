@@ -75,8 +75,10 @@ void handleRoot(Settings* settings, WebServer& server) {
 
     html += "<a href=\"/setTime\" class='btn btn-secondary'>Einstellungen Uhr</a><br><br>";  // Button für Aktoreinstellungen
 
-    // JavaScript für AJAX-Updates
+    // JavaScript für AJAX-Updates und Reconnect-Logik
     html += "<script>";
+    html += "var lastSuccessfulUpdate = Date.now();";  // Zeitpunkt des letzten erfolgreichen Updates
+
     html += "function updateData() {";
     html += "  var xhr = new XMLHttpRequest();";
     html += "  xhr.onreadystatechange = function() {";
@@ -101,12 +103,29 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "      document.getElementById('minutes').innerHTML = (data.minutes < 10 ? '0' : '') + data.minutes;";
     html += "      document.getElementById('seconds').innerHTML = (data.seconds < 10 ? '0' : '') + data.seconds;";
     html += "      document.getElementById('crashcounter').innerHTML = data.crashcounter;";
+    html += "      lastSuccessfulUpdate = Date.now();";  // Erfolgreiches Update
     html += "    }";
     html += "  };";
+    
+    // Timeout einstellen
+    html += "  xhr.timeout = 2000;";  // 2 Sekunden Timeout
+    html += "  xhr.ontimeout = function () {";
+    html += "    console.warn('Request timed out, attempting reconnect...');";
+    html += "    attemptReconnect();";  // Reconnect-Versuch bei Timeout
+    html += "  };";
+    
     html += "  xhr.open('GET', '/updateData', true);";
     html += "  xhr.send();";
     html += "}";
-    html += "setInterval(updateData, 1000);";  // Aktualisierung alle 2 Sekunden
+
+    html += "function attemptReconnect() {";
+    html += "  if (Date.now() - lastSuccessfulUpdate > 2000) {";
+    html += "    console.log('No response, attempting to reload the page...');";
+    html += "    location.reload();";  // Seite neu laden, um die Verbindung wiederherzustellen
+    html += "  }";
+    html += "}";
+
+    html += "setInterval(updateData, 1000);";  // Regelmäßige Aktualisierung alle 1 Sekunde
     html += "</script>";
 
     html += "</div></body></html>";
