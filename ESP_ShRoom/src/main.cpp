@@ -106,7 +106,7 @@ void loop() {
     settings.lastUpdateTime = loopstart;
 
     // Überprüfe, ob genug Zeit seit der letzten Sensor 1-Abfrage vergangen ist
-    if (loopstart - lastSensor1Update >= sensorInterval) {
+    if (loopstart - lastSensor1Update >= sensorInterval*1.2) {
         // Sensor 1-Daten aktualisieren
         settings.temperature1 = sht20_1.getTemperature();
         settings.humidity1 = sht20_1.getHumidity();
@@ -115,7 +115,7 @@ void loop() {
     }
 
     // Überprüfe, ob genug Zeit seit der letzten Sensor 2-Abfrage vergangen ist
-    if (loopstart - lastSensor2Update >= sensorInterval) {
+    if (loopstart - lastSensor2Update >= sensorInterval*0.8) {
         // Sensor 2-Daten aktualisieren
         settings.temperature2 = sht20_2.getTemperature();
         settings.humidity2 = sht20_2.getHumidity();
