@@ -127,11 +127,14 @@ void loop() {
     // Uhrzeit aktualisieren
     offline_clock.updateTime();
 
-    // Aktualisiere den Lüfterstatus für alle Ausgänge. Regler usw.
+    // Regelung der Lüfter und Steckdosen
     //##############################################################################################
     //##############################################################################################
     float lazy_temperature1 = faultfilter1.checkValue(settings.temperature1);
     settings.isEnabled3 = hysteresiscontroller.update(settings.isEnabled3, lazy_temperature1);
+
+    // Lüfter 1 hängt an relais 1
+    // Heitzung hängt an Steckdose 1 bzw. relais 3
 
     float lazy_temperature2 = faultfilter2.checkValue(settings.temperature2);
     settings.isEnabled1 = true;

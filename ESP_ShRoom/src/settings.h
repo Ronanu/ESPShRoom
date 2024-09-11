@@ -21,6 +21,8 @@ struct Settings {
     // TemperatureControlSettings
     float targetTemperature;    
     float hysteresis;
+    float deltaTmax;
+    float maxHumidity;
 
     // TimeSettings
     int hours;
