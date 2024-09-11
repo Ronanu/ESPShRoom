@@ -4,7 +4,7 @@
 #include <Preferences.h>
 
 struct Settings {
-    // FanControlSettings
+    // RelaySettings
     bool isEnabled1 = false;
     bool isEnabled2 = false;
     bool isEnabled3 = false;
@@ -37,14 +37,6 @@ struct Settings {
     float humidity1;
     float humidity2;
 };
-
-struct SensorData {
-    float temperature1;
-    float temperature2;
-    float humidity1;
-    float humidity2;
-};
-
 
 void printSettings(const Settings& settings);
 void saveCurrentSettings(Settings settings, Preferences* preferences);

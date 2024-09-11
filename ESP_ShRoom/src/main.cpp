@@ -127,7 +127,8 @@ void loop() {
     offline_clock.updateTime();
 
     // Aktualisiere den Lüfterstatus für alle Ausgänge. Regler usw.
-
+    //##############################################################################################
+    //##############################################################################################
     float lazy_temperature1 = faultfilter1.checkValue(settings.temperature1);
     settings.isEnabled3 = tempcontr1.update(settings.isEnabled3, lazy_temperature1);
 
@@ -143,6 +144,9 @@ void loop() {
         settings.onPercentage1 = 100;
         settings.isEnabled3 = false;
     }
+
+    //##############################################################################################
+    //##############################################################################################
 
 
     fanControl1->update();
