@@ -20,8 +20,9 @@ const int pinSens1_scl = 19;
 const int pinSens2_sda = 21;
 const int pinSens2_scl = 22;
 
-const char* ssid = "ESP32_AP";
+const char* ssid = "ShRoom";
 const char* password = "12345678";
+// ip = http://192.168.4.1/
 
 const unsigned long sensorInterval = 200;  // 500 ms Intervall für Sensorabfragen
 
