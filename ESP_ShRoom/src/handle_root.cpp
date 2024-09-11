@@ -93,6 +93,8 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "      document.getElementById('hysteresis').innerHTML = data.hysteresis;";
     html += "      document.getElementById('temperature1').innerHTML = data.temperature1;";
     html += "      document.getElementById('humidity1').innerHTML = data.humidity1;";
+    html += "      document.getElementById('temperature2').innerHTML = data.temperature2;";
+    html += "      document.getElementById('humidity2').innerHTML = data.humidity2;";
     html += "      document.getElementById('lastUpdateTime').innerHTML = data.lastUpdateTime;";
     html += "      document.getElementById('hours').innerHTML = data.hours;";
     html += "      document.getElementById('minutes').innerHTML = (data.minutes < 10 ? '0' : '') + data.minutes;";
