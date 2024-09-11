@@ -33,4 +33,7 @@ public:
     void updateTime();
 };
 
+void handleRoot(Settings* settings, WebServer& server);
+void handleUpdateData(Settings* settings, WebServer& server);
+
 #endif // OFFLINE_CLOCK_H

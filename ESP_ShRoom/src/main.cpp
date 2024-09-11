@@ -6,7 +6,6 @@
 #include <WebServer.h>
 #include <Preferences.h>
 #include "web_handlers.h"
-#include "handle_root.h"
 #include "SHT20Sensor.h"
 #include "Temperaturecontroller.h"
 
@@ -44,7 +43,8 @@ SpecialPwmControll* fanControl3;
 SpecialPwmControll* fanControl4;
 
 HysteresisController tempcontr1(&settings.targetTemperature, &settings.hysteresis);
-FaultFilter faultfilter(5);
+FaultFilter faultfilter1(5);
+FaultFilter faultfilter2(5);
 OfflineClock offline_clock(&settings, &preferences);
 
 
@@ -126,10 +126,24 @@ void loop() {
     // Uhrzeit aktualisieren
     offline_clock.updateTime();
 
-    // Aktualisiere den Lüfterstatus für alle vier Lüfter
+    // Aktualisiere den Lüfterstatus für alle Ausgänge. Regler usw.
 
-    float lazy_temperature = faultfilter.checkValue(settings.temperature1);
-    settings.isEnabled3 = tempcontr1.update(settings.isEnabled3, lazy_temperature);
+    float lazy_temperature1 = faultfilter1.checkValue(settings.temperature1);
+    settings.isEnabled3 = tempcontr1.update(settings.isEnabled3, lazy_temperature1);
+
+    float lazy_temperature2 = faultfilter2.checkValue(settings.temperature2);
+    settings.isEnabled1 = true;
+    if (lazy_temperature2 <= settings.targetTemperature + 1) {
+        settings.onPercentage1 = 0;
+    } else if (lazy_temperature2 <= settings.targetTemperature + 2) {
+        settings.onPercentage1 = 50;
+    } else if (lazy_temperature2 <= settings.targetTemperature + 3) {
+        settings.onPercentage1 = 100;
+    } else if (lazy_temperature2 > settings.targetTemperature + 4)  {
+        settings.onPercentage1 = 100;
+        settings.isEnabled3 = false;
+    }
+
 
     fanControl1->update();
     fanControl2->update();
