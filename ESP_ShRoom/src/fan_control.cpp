@@ -1,7 +1,7 @@
 #include "fan_control.h"
 
 // Konstruktor
-FanControl::FanControl(bool* enabledAddr, int* onTimeAddr, int* onPercentageAddr, int pin) {
+SpecialPwmControll::SpecialPwmControll(bool* enabledAddr, int* onTimeAddr, int* onPercentageAddr, int pin) {
     this->enabledAddr = enabledAddr;
     this->onTimeAddr = onTimeAddr;
     this->onPercentageAddr = onPercentageAddr;
@@ -15,7 +15,7 @@ FanControl::FanControl(bool* enabledAddr, int* onTimeAddr, int* onPercentageAddr
 }
 
 // Initialisierungsmethode
-void FanControl::initialize() {
+void SpecialPwmControll::initialize() {
     // Sicherstellen, dass der Lüfter im richtigen Zustand startet
     calculateDurations();  // Berechne initiale Ein- und Ausschaltdauer
     if (*enabledAddr) {
@@ -27,7 +27,7 @@ void FanControl::initialize() {
 }
 
 // Diese Methode wird regelmäßig aufgerufen, um den Zustand basierend auf der Zeit zu überprüfen
-void FanControl::update() {
+void SpecialPwmControll::update() {
     if (!*enabledAddr) {
         // Wenn der Lüfter ausgeschaltet sein soll, dann immer ausschalten
         switchFan(false);
@@ -51,13 +51,13 @@ void FanControl::update() {
 }
 
 // Methode zum Umschalten des Lüfterstatus
-void FanControl::switchFan(bool state) {
+void SpecialPwmControll::switchFan(bool state) {
     isFanOn = state;
     digitalWrite(pin, state ? LOW : HIGH);  // Lüfter an oder aus
 }
 
 // Berechnung der Ein- und Ausschaltdauer basierend auf der Gesamtdauer und der Einschaltdauer in Prozent
-void FanControl::calculateDurations() {
+void SpecialPwmControll::calculateDurations() {
     onTimeMillis = (*onTimeAddr) * 1000;  // Gesamtdauer des Zyklus in Millisekunden
     if (*onPercentageAddr <= 0) {
     }

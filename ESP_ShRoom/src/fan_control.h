@@ -3,11 +3,11 @@
 
 #include <Arduino.h>
 
-// FanControl-Klasse
-class FanControl {
+// SpecialPwmControll-Klasse
+class SpecialPwmControll {
 public:
     // Konstruktor erhält die Adresse des Status, der Gesamtdauer, der Einschaltdauer in Prozent und den Pin
-    FanControl(bool* enabledAddr, int* onTimeAddr, int* onPercentageAddr, int pin);
+    SpecialPwmControll(bool* enabledAddr, int* onTimeAddr, int* onPercentageAddr, int pin);
     
     // Initialisierungsmethode
     void initialize();

@@ -10,25 +10,38 @@
 #include "SHT20Sensor.h"
 #include "Temperaturecontroller.h"
 
+
+const int relayPin1 = 25;
+const int relayPin2 = 17;
+const int relayPin3 = 32;
+const int relayPin4 = 33;
+
+const int pinSens1_sda = 18;
+const int pinSens1_scl = 19;
+const int pinSens2_sda = 21;
+const int pinSens2_scl = 22;
+
+const char* ssid = "ESP32_AP";
+const char* password = "12345678";
+
+const unsigned long sensorInterval = 200;  // 500 ms Intervall für Sensorabfragen
+
 // Sensor-Instanzen
-SHT20Sensor sht20_1(18, 19, Wire);  // Sensor 1 an Pin 18, 19
-SHT20Sensor sht20_2(21, 22, Wire1);  // Sensor 2 an Pin 21, 22
+SHT20Sensor sht20_1(pinSens1_sda, pinSens1_scl, Wire);  // Sensor 1 an Pin 18, 19
+SHT20Sensor sht20_2(pinSens2_sda, pinSens2_scl, Wire1);  // Sensor 2 an Pin 21, 22
 
 // Globales Settings-Objekt
 Settings settings;
 // Preferences-Objekt, das abgespeichert wird
 Preferences preferences;
 
-const char* ssid = "ESP32_AP";
-const char* password = "12345678";
-
 WebServer server(80);
 
-// FanControl-Instanzen für vier Lüfter
-FanControl* fanControl1;
-FanControl* fanControl2;
-FanControl* fanControl3;
-FanControl* fanControl4;
+// SpecialPwmControll-Instanzen für vier Lüfter
+SpecialPwmControll* fanControl1;
+SpecialPwmControll* fanControl2;
+SpecialPwmControll* fanControl3;
+SpecialPwmControll* fanControl4;
 
 HysteresisController tempcontr1(&settings.targetTemperature, &settings.hysteresis);
 FaultFilter faultfilter(5);
@@ -38,13 +51,13 @@ OfflineClock offline_clock(&settings, &preferences);
 // Sensor Task Zeiten
 unsigned long lastSensor1Update = 0;
 unsigned long lastSensor2Update = 0;
-const unsigned long sensorInterval = 500;  // 500 ms Intervall für Sensorabfragen
+
 
 void setup() {
     Serial.begin(115200);
     offline_clock.startClock();
-    Wire.setTimeout(100);  // Timeout auf 100 ms
-    Wire1.setTimeout(100);  // Timeout auf 100 ms
+    Wire.setTimeout(20);  // Timeout auf 100 ms
+    Wire1.setTimeout(20);  // Timeout auf 100 ms
 
     // Initialisierung der Sensoren
     if (!sht20_1.begin()) {
@@ -74,10 +87,10 @@ void setup() {
     server.begin();
     Serial.println("Webserver gestartet");
 
-    fanControl1 = new FanControl(&settings.isEnabled1, &settings.onTime1, &settings.onPercentage1, 25);
-    fanControl2 = new FanControl(&settings.isEnabled2, &settings.onTime2, &settings.onPercentage2, 17);
-    fanControl3 = new FanControl(&settings.isEnabled3, &settings.onTime3, &settings.onPercentage3, 32);
-    fanControl4 = new FanControl(&settings.isEnabled4, &settings.onTime4, &settings.onPercentage4, 33);
+    fanControl1 = new SpecialPwmControll(&settings.isEnabled1, &settings.onTime1, &settings.onPercentage1, relayPin1);
+    fanControl2 = new SpecialPwmControll(&settings.isEnabled2, &settings.onTime2, &settings.onPercentage2, relayPin2);
+    fanControl3 = new SpecialPwmControll(&settings.isEnabled3, &settings.onTime3, &settings.onPercentage3, relayPin3);
+    fanControl4 = new SpecialPwmControll(&settings.isEnabled4, &settings.onTime4, &settings.onPercentage4, relayPin4);
 
     fanControl1->initialize();
     fanControl2->initialize();

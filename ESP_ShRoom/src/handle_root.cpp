@@ -1,4 +1,4 @@
-#include "handle_root.h"
+#include "web_handlers.h"
 
 // Diese Funktion generiert die Weboberfläche
 void handleRoot(Settings* settings, WebServer& server) {
@@ -103,7 +103,7 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "  xhr.open('GET', '/updateData', true);";
     html += "  xhr.send();";
     html += "}";
-    html += "setInterval(updateData, 600);";  // Aktualisierung alle 2 Sekunden
+    html += "setInterval(updateData, 1000);";  // Aktualisierung alle 2 Sekunden
     html += "</script>";
 
     html += "</div></body></html>";
