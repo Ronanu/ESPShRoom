@@ -41,7 +41,7 @@ void showHelpPage(Settings* settings, WebServer& server) {
     html += "<p>Das System regelt aktuell Lüfter 1 und die Heizung. Lüfter 2 und 3 sind noch nicht implementiert. Der Regelkreis steuert die Geräte basierend auf den gemessenen Temperaturen und der festgelegten Zieltemperatur.</p>";
     html += "<pre>";
     html += "float lazy_temperature1 = faultfilter1.checkValue(settings.temperature1);\n";
-    html += "settings.isEnabled3 = hysteresiscontroller.update(settings.isEnabled3, lazy_temperature1);\n";
+    html += "settings.isEnabled3 = hysteresis_temp_controller.update(settings.isEnabled3, lazy_temperature1);\n";
     // Lüfter 1 hängt an relais 1
 
     // Heizung hängt an Steckdose 1 bzw. relais 3

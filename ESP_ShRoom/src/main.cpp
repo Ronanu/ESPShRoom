@@ -24,8 +24,6 @@ const char* ssid = "ShRoom";
 const char* password = "12345678";
 // ip = http://192.168.4.1/
 
-const unsigned long sensorInterval = 200;  // 500 ms Intervall für Sensorabfragen
-
 // Sensor-Instanzen
 SHT20Sensor sht20_1(pinSens1_sda, pinSens1_scl, Wire);  // Sensor 1 an Pin 18, 19
 SHT20Sensor sht20_2(pinSens2_sda, pinSens2_scl, Wire1);  // Sensor 2 an Pin 21, 22
@@ -43,22 +41,71 @@ SpecialPwmControll* fanControl2;
 SpecialPwmControll* fanControl3;
 SpecialPwmControll* fanControl4;
 
-HysteresisController hysteresiscontroller(&settings.targetTemperature, &settings.hysteresis);
+HysteresisController hysteresis_temp_controller(&settings.targetTemperature, &settings.hysteresis);
 FaultFilter faultfilter1(5);
 FaultFilter faultfilter2(5);
 OfflineClock offline_clock(&settings, &preferences);
 
 
-// Sensor Task Zeiten
-unsigned long lastSensor1Update = 0;
-unsigned long lastSensor2Update = 0;
+// Shared sensor data variable
+sensorData sharedSensorData;
+
+// Mutex handle
+SemaphoreHandle_t mutex;
+// Task function for Core 1
+void taskOnCore1(void *param) {
+  while (true) {
+    // Try to take the mutex before accessing the shared struct
+        float temperature1 = sht20_1.getTemperature();
+        float humidity1 = sht20_1.getHumidity();
+        float temperature2 = sht20_2.getTemperature();
+        float humidity2 = sht20_2.getHumidity();
+    if (xSemaphoreTake(mutex, portMAX_DELAY)) {
+      // Modify sensor data safely
+        sharedSensorData.temperature1 = temperature1;
+        sharedSensorData.humidity1 = humidity1;
+        sharedSensorData.temperature2 = temperature2;
+        sharedSensorData.humidity2 = humidity2;
+    }      
+        // Release the mutex
+        xSemaphoreGive(mutex);
+    }
+    delay(1000);
+}
+
+
 
 
 void setup() {
     Serial.begin(115200);
     offline_clock.startClock();
+    Wire.begin(pinSens1_sda, pinSens1_scl);  // Initialisiere den Wire Bus für Sensor 1
+    Wire1.begin(pinSens2_sda, pinSens2_scl); // Initialisiere den Wire1 Bus für Sensor 2
     Wire.setTimeout(20);  // Timeout auf 100 ms
     Wire1.setTimeout(20);  // Timeout auf 100 ms
+
+    sharedSensorData.temperature1 = 0.0f;
+    sharedSensorData.temperature2 = 0.0f;
+    sharedSensorData.humidity1 = 0.0f;
+    sharedSensorData.humidity2 = 0.0f;
+
+        // Create the mutex
+    mutex = xSemaphoreCreateMutex();
+    if (mutex == NULL) {
+        Serial.println("Failed to create mutex");
+        while (1); // Stop execution if mutex creation failed
+    }
+    
+    // Start task on Core 1
+    xTaskCreatePinnedToCore(
+        taskOnCore1,   // Task function
+        "TaskOnCore1", // Name of the task
+        10000,         // Stack size
+        NULL,          // Task input parameter
+        1,             // Priority
+        NULL,          // Task handle
+        1              // Core to pin the task to (1 = Core 1)
+    );
 
     // Initialisierung der Sensoren
     if (!sht20_1.begin()) {
@@ -107,23 +154,15 @@ void loop() {
     unsigned long loopstart = millis();
     settings.lastUpdateTime = loopstart;
 
-    // Überprüfe, ob genug Zeit seit der letzten Sensor 1-Abfrage vergangen ist
-    if (loopstart - lastSensor1Update >= sensorInterval*1.2) {
-        // Sensor 1-Daten aktualisieren
-        settings.temperature1 = sht20_1.getTemperature();
-        settings.humidity1 = sht20_1.getHumidity();
-        lastSensor1Update = loopstart;  // Zeit der letzten Aktualisierung speichern
-        Serial.println("Sensor 1 Daten aktualisiert");
-    }
-
-    // Überprüfe, ob genug Zeit seit der letzten Sensor 2-Abfrage vergangen ist
-    if (loopstart - lastSensor2Update >= sensorInterval*0.8) {
-        // Sensor 2-Daten aktualisieren
-        settings.temperature2 = sht20_2.getTemperature();
-        settings.humidity2 = sht20_2.getHumidity();
-        lastSensor2Update = loopstart;  // Zeit der letzten Aktualisierung speichern
-        Serial.println("Sensor 2 Daten aktualisiert");
-    }
+    if (xSemaphoreTake(mutex, portMAX_DELAY)) {
+      // Modify sensor data safely
+        settings.temperature1 = sharedSensorData.temperature1;
+        settings.humidity1 = sharedSensorData.humidity1;
+        settings.temperature2 = sharedSensorData.temperature2;
+        settings.humidity2 = sharedSensorData.humidity2;
+    }      
+        // Release the mutex
+        xSemaphoreGive(mutex);
 
     // Uhrzeit aktualisieren
     offline_clock.updateTime();
@@ -132,7 +171,7 @@ void loop() {
     //##############################################################################################
     //##############################################################################################
     float lazy_temperature1 = faultfilter1.checkValue(settings.temperature1);
-    settings.isEnabled3 = hysteresiscontroller.update(settings.isEnabled3, lazy_temperature1);
+    settings.isEnabled3 = hysteresis_temp_controller.update(settings.isEnabled3, lazy_temperature1);
 
     // Lüfter 1 hängt an relais 1
     // Heitzung hängt an Steckdose 1 bzw. relais 3
