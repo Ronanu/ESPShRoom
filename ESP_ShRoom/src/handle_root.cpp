@@ -127,7 +127,7 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "  }";
     html += "}";
 
-    html += "setInterval(updateData, 1000);";  // Regelmäßige Aktualisierung alle 1 Sekunde
+    html += "setInterval(updateData, 250);";  // Regelmäßige Aktualisierung alle 1 Sekunde
     html += "</script>";
 
     html += "</div></body></html>";
