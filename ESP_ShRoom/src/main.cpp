@@ -8,7 +8,7 @@
 #include "web_handlers.h"
 #include "SHT20Sensor.h"
 #include "Temperaturecontroller.h"
-
+#include "ClockSwitch.h"
 
 const int relayPin1 = 25;
 const int relayPin2 = 17;
