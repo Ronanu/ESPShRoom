@@ -38,6 +38,12 @@ struct Settings {
     float temperature2;
     float humidity1;
     float humidity2;
+
+    // Light Clock Timer
+    int ct_lowerHour;
+    int ct_lowerMinute;
+    int ct_upperHour;
+    int ct_upperMinute;
 };
 
 struct sensorData {
