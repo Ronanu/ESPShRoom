@@ -6,12 +6,14 @@
 
 void handleRoot(Settings* settings, WebServer& server);
 void handleUpdateData(Settings* settings, WebServer& server);
-void showSetValuesPage(Settings* settings, WebServer& server);
+
 void handleSetValues(Settings* settings, WebServer& server, Preferences* preferences);
 void handleSetTimePage(Settings* settings, WebServer& server);
 void handleSetTime(Settings* settings, WebServer& server, Preferences* preferences);
 
 void showHelpPage(Settings* settings, WebServer& server);
+
+void showSetValuesPage(Settings* settings, WebServer& server);
 
 #endif
 

@@ -57,12 +57,12 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "Zyklusanteil: <span id='onPercentage2'>" + String(settings->onPercentage2) + "</span> %<br><br>";  // Normaler Text
 
     // Steckdose 1
-    html += "<h3>Steckdose 1:</h3>";  // Steckdose 1 als Unterüberschrift
+    html += "<h3>Steckdose 1: Heizung</h3>";  // Steckdose 1 als Unterüberschrift
     html += "Aktive Laufzeit: <span id='onTime3'>" + String(settings->onTime3) + "</span> Sekunden<br>";  // Normaler Text
     html += "Zyklusanteil: <span id='onPercentage3'>" + String(settings->onPercentage3) + "</span> %<br><br>";  // Normaler Text
 
     // Steckdose 2
-    html += "<h3>Steckdose 2:</h3>";  // Steckdose 2 als Unterüberschrift
+    html += "<h3>Steckdose 2: Licht</h3>";  // Steckdose 2 als Unterüberschrift
     html += "Aktive Laufzeit: <span id='onTime4'>" + String(settings->onTime4) + "</span> Sekunden<br>";  // Normaler Text
     html += "Zyklusanteil: <span id='onPercentage4'>" + String(settings->onPercentage4) + "</span> %<br><br>";  // Normaler Text
     html += "</div>";

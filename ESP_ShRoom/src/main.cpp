@@ -8,6 +8,8 @@
 #include "web_handlers.h"
 #include "SHT20Sensor.h"
 #include "Temperaturecontroller.h"
+#include "esp_task_wdt.h" // Bibliothek für den Task Watchdog
+#include "ClockSwitch.h"
 
 
 const int relayPin1 = 25;
@@ -36,15 +38,16 @@ Preferences preferences;
 WebServer server(80);
 
 // SpecialPwmControll-Instanzen für vier Lüfter
-SpecialPwmControll* fanControl1;
-SpecialPwmControll* fanControl2;
-SpecialPwmControll* fanControl3;
-SpecialPwmControll* fanControl4;
+SpecialPwmControll* relayControl1;
+SpecialPwmControll* relayControl2;
+SpecialPwmControll* relayControl3;
+SpecialPwmControll* relayControl4;
 
 HysteresisController hysteresis_temp_controller(&settings.targetTemperature, &settings.hysteresis);
 FaultFilter faultfilter1(5);
 FaultFilter faultfilter2(5);
 OfflineClock offline_clock(&settings, &preferences);
+//ClockSwitch light_clock_controller(&settings);
 
 
 // Shared sensor data variable
@@ -55,34 +58,49 @@ SemaphoreHandle_t mutex;
 // Task function for Core 1
 void taskOnCore1(void *param) {
   while (true) {
-    // Try to take the mutex before accessing the shared struct
-        float temperature1 = sht20_1.getTemperature();
-        float humidity1 = sht20_1.getHumidity();
-        float temperature2 = sht20_2.getTemperature();
-        float humidity2 = sht20_2.getHumidity();
-    if (xSemaphoreTake(mutex, portMAX_DELAY)) {
-      // Modify sensor data safely
-        sharedSensorData.temperature1 = temperature1;
-        sharedSensorData.humidity1 = humidity1;
-        sharedSensorData.temperature2 = temperature2;
-        sharedSensorData.humidity2 = humidity2;
-    }      
-        // Release the mutex
-        xSemaphoreGive(mutex);
+    // Read sensor data
+    float temperature1 = sht20_1.getTemperature();
+    float humidity1 = sht20_1.getHumidity();
+    float temperature2 = sht20_2.getTemperature();
+    float humidity2 = sht20_2.getHumidity();
+
+    // Ensure sensor readings are valid (check for NaN or invalid data)
+    if (isnan(temperature1) || isnan(humidity1) || isnan(temperature2) || isnan(humidity2)) {
+      Serial.println("Sensor data invalid, skipping update.");
+      delay(100);
+      continue;
     }
-    delay(1000);
+
+    // Mutex lock for shared data
+    if (xSemaphoreTake(mutex, portMAX_DELAY)) {
+      sharedSensorData.temperature1 = temperature1;
+      sharedSensorData.humidity1 = humidity1;
+      sharedSensorData.temperature2 = temperature2;
+      sharedSensorData.humidity2 = humidity2;
+      xSemaphoreGive(mutex);
+    }
+    
+    delay(100);
+  }
 }
 
 
 
 
 void setup() {
+    // Initialisierung des Task Watchdog Timers
+    esp_task_wdt_init(5, true);  // Timeout von 5 Sekunden, Reset beim Timeout
+    esp_task_wdt_add(NULL);      // Aktuelle Task zum Watchdog hinzufügen
+    // NVS Initialisierung und Werte laden
+    preferences.begin("my-app", false);
+    loadSettings(&settings, &preferences);
+
     Serial.begin(115200);
     offline_clock.startClock();
     Wire.begin(pinSens1_sda, pinSens1_scl);  // Initialisiere den Wire Bus für Sensor 1
     Wire1.begin(pinSens2_sda, pinSens2_scl); // Initialisiere den Wire1 Bus für Sensor 2
-    Wire.setTimeout(20);  // Timeout auf 100 ms
-    Wire1.setTimeout(20);  // Timeout auf 100 ms
+    Wire.setTimeout(100);  // Timeout auf 100 ms
+    Wire1.setTimeout(100);  // Timeout auf 100 ms
 
     sharedSensorData.temperature1 = 0.0f;
     sharedSensorData.temperature2 = 0.0f;
@@ -107,19 +125,6 @@ void setup() {
         1              // Core to pin the task to (1 = Core 1)
     );
 
-    // Initialisierung der Sensoren
-    if (!sht20_1.begin()) {
-        Serial.println("Maximale Anzahl von Versuchen erreicht, Sensor 1 konnte nicht verbunden werden.");
-    } else {
-        Serial.println("Sensor 1 erfolgreich initialisiert.");
-    }
-
-    if (!sht20_2.begin()) {
-        Serial.println("Maximale Anzahl von Versuchen erreicht, Sensor 2 konnte nicht verbunden werden.");
-    } else {
-        Serial.println("Sensor 2 erfolgreich initialisiert.");
-    }
-
     // Konfiguration des ESP32 als Access Point
     WiFi.softAP(ssid, password);
     Serial.println("Access Point gestartet");
@@ -130,21 +135,23 @@ void setup() {
     server.on("/setTime", [&]() { handleSetTimePage(&settings, server); });
     server.on("/set_values", [&]() { showSetValuesPage(&settings, server); });
     server.on("/help", [&]() { showHelpPage(&settings, server); });
+
     server.on("/updateData", [&]() { handleUpdateData(&settings, server); });
+
     server.on("/updateTime", [&]() { handleSetTime(&settings, server, &preferences); });
     server.on("/update_values", [&]() { handleSetValues(&settings, server, &preferences); });
     server.begin();
     Serial.println("Webserver gestartet");
 
-    fanControl1 = new SpecialPwmControll(&settings.isEnabled1, &settings.onTime1, &settings.onPercentage1, relayPin1);
-    fanControl2 = new SpecialPwmControll(&settings.isEnabled2, &settings.onTime2, &settings.onPercentage2, relayPin2);
-    fanControl3 = new SpecialPwmControll(&settings.isEnabled3, &settings.onTime3, &settings.onPercentage3, relayPin3);
-    fanControl4 = new SpecialPwmControll(&settings.isEnabled4, &settings.onTime4, &settings.onPercentage4, relayPin4);
+    relayControl1 = new SpecialPwmControll(&settings.isEnabled1, &settings.onTime1, &settings.onPercentage1, relayPin1);
+    relayControl2 = new SpecialPwmControll(&settings.isEnabled2, &settings.onTime2, &settings.onPercentage2, relayPin2);
+    relayControl3 = new SpecialPwmControll(&settings.isEnabled3, &settings.onTime3, &settings.onPercentage3, relayPin3);
+    relayControl4 = new SpecialPwmControll(&settings.isEnabled4, &settings.onTime4, &settings.onPercentage4, relayPin4);
 
-    fanControl1->initialize();
-    fanControl2->initialize();
-    fanControl3->initialize();
-    fanControl4->initialize();
+    relayControl1->initialize();
+    relayControl2->initialize();
+    relayControl3->initialize();
+    relayControl4->initialize();
 }
 
 void loop() {
@@ -170,13 +177,16 @@ void loop() {
     // Regelung der Lüfter und Steckdosen
     //##############################################################################################
     //##############################################################################################
+    // Heizungsregler: Steckdose 1
+    // sensor value smoothing
     float lazy_temperature1 = faultfilter1.checkValue(settings.temperature1);
+    float lazy_temperature2 = faultfilter2.checkValue(settings.temperature2);
+    // update heating status depending on temperature1 
     settings.isEnabled3 = hysteresis_temp_controller.update(settings.isEnabled3, lazy_temperature1);
 
     // Lüfter 1 hängt an relais 1
-    // Heitzung hängt an Steckdose 1 bzw. relais 3
+    // Heitzung hängt an relais 3 --> Steckdose 1 
 
-    float lazy_temperature2 = faultfilter2.checkValue(settings.temperature2);
     settings.isEnabled1 = true;
     if (lazy_temperature2 <= settings.targetTemperature + 1) {
         settings.onPercentage1 = 0;
@@ -193,14 +203,15 @@ void loop() {
     //##############################################################################################
 
 
-    fanControl1->update();
-    fanControl2->update();
-    fanControl3->update();
-    fanControl4->update();
+    relayControl1->update();
+    relayControl2->update();
+    relayControl3->update();
+    relayControl4->update();
 
     Serial.println("\n\n\nAktualisierte Sensor- und Lüfterdaten");
     Serial.println("loop time = " + String(millis()-loopstart));
     printSettings(settings);
     
+    esp_task_wdt_reset();  // Lebenszeichen senden
     delay(100);  // Kleine Pause, um die CPU zu entlasten
 }

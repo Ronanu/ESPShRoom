@@ -10,6 +10,7 @@ void handleSetTimePage(Settings* settings, WebServer& server) {
     // Eingabefelder für die Uhrzeit
     html += "Stunde: <input type=\"number\" name=\"hour\" value=\"" + String(settings->hours) + "\" min=\"0\" max=\"23\"><br>";
     html += "Minute: <input type=\"number\" name=\"minute\" value=\"" + String(settings->minutes) + "\" min=\"0\" max=\"59\"><br>";
+    html += "Sekunde: <input type=\"number\" name=\"second\" value=\"" + String(settings->seconds) + "\" min=\"0\" max=\"59\"><br>";
 
     html += "<input type=\"submit\" value=\"Setze Uhrzeit\">";
     html += "</form>";
@@ -72,10 +73,11 @@ void showSetValuesPage(Settings* settings, WebServer& server) {
     html += "<input type=\"number\" name=\"onTime3\" value=\"" + String(settings->onTime3) + "\" min=\"0\"><br>";
     html += "Zyklusanteil (in Prozent): ";
     html += "<input type=\"number\" name=\"onPercentage3\" value=\"" + String(settings->onPercentage3) + "\" min=\"5\" max=\"100\"><br>";
+    html += "Die Steckdose 1 wird als Heizung verwendet.<br>Die Aktivierung erfolgt über den Temperaturregler.<br>";
     // html += "Aktiviert: <input type=\"checkbox\" name=\"isEnabled3\" " + String(settings->isEnabled3 ? "checked" : "") + "><br><br>";
 
     // Steckdose 2
-    html += "<h3>Steckdose 2</h3>";
+    html += "<h3>Steckdose 2: Lichtschaltung</h3>";
     html += "Aktive Laufzeit (in Sekunden): ";
     html += "<input type=\"number\" name=\"onTime4\" value=\"" + String(settings->onTime4) + "\" min=\"0\"><br>";
     html += "Zyklusanteil (in Prozent): ";
