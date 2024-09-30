@@ -44,10 +44,10 @@ void saveCurrentSettings(Settings settings, Preferences* preferences) {
     preferences->putInt("onTime3", settings.onTime3);
     preferences->putInt("onTime4", settings.onTime4);
 
-    preferences->putInt("isEnabled1", settings.isEnabled1);
-    preferences->putInt("isEnabled2", settings.isEnabled2);
-    preferences->putInt("isEnabled3", settings.isEnabled3);
-    preferences->putInt("isEnabled4", settings.isEnabled4);
+    preferences->putBool("isEnabled1", settings.isEnabled1);
+    preferences->putBool("isEnabled2", settings.isEnabled2);
+    preferences->putBool("isEnabled3", settings.isEnabled3);
+    preferences->putBool("isEnabled4", settings.isEnabled4);
 
     preferences->putInt("onPercentage1", settings.onPercentage1);
     preferences->putInt("onPercentage2", settings.onPercentage2);
@@ -56,10 +56,26 @@ void saveCurrentSettings(Settings settings, Preferences* preferences) {
 
     preferences->putFloat("targetTemp", settings.targetTemperature);
     preferences->putFloat("hysteresis", settings.hysteresis);
+    preferences->putFloat("deltaTmax", settings.deltaTmax);
+    preferences->putFloat("maxHumidity", settings.maxHumidity);
+
     preferences->putInt("hours", settings.hours);
     preferences->putInt("minutes", settings.minutes);
     preferences->putInt("seconds", settings.seconds);
+
+    preferences->putFloat("temperature1", settings.temperature1);
+    preferences->putFloat("temperature2", settings.temperature2);
+    preferences->putFloat("humidity1", settings.humidity1);
+    preferences->putFloat("humidity2", settings.humidity2);
+
+    preferences->putInt("ct_lowerHour", settings.ct_lowerHour);
+    preferences->putInt("ct_lowerMinute", settings.ct_lowerMinute);
+    preferences->putInt("ct_upperHour", settings.ct_upperHour);
+    preferences->putInt("ct_upperMinute", settings.ct_upperMinute);
+
     preferences->putInt("crashcounter", settings.crashcounter);
+    preferences->putInt("lastUpdateTime", settings.lastUpdateTime);
+
     Serial.println("Werte gespeichert!");
 }
 
@@ -69,10 +85,10 @@ void loadSettings(Settings* settings, Preferences* preferences) {
     settings->onTime3 = preferences->getInt("onTime3", 10);
     settings->onTime4 = preferences->getInt("onTime4", 10);
 
-    settings->isEnabled1 = preferences->getInt("isEnabled1", 0);
-    settings->isEnabled2 = preferences->getInt("isEnabled2", 0);
-    settings->isEnabled3 = preferences->getInt("isEnabled3", 0);
-    settings->isEnabled4 = preferences->getInt("isEnabled4", 0);
+    settings->isEnabled1 = preferences->getBool("isEnabled1", false);
+    settings->isEnabled2 = preferences->getBool("isEnabled2", false);
+    settings->isEnabled3 = preferences->getBool("isEnabled3", false);
+    settings->isEnabled4 = preferences->getBool("isEnabled4", false);
 
     settings->onPercentage1 = preferences->getInt("onPercentage1", 100);
     settings->onPercentage2 = preferences->getInt("onPercentage2", 100);
@@ -81,12 +97,25 @@ void loadSettings(Settings* settings, Preferences* preferences) {
 
     settings->targetTemperature = preferences->getFloat("targetTemp", 22.0);
     settings->hysteresis = preferences->getFloat("hysteresis", 0.3);
+    settings->deltaTmax = preferences->getFloat("deltaTmax", 5.0);
+    settings->maxHumidity = preferences->getFloat("maxHumidity", 60.0);
 
     settings->hours = preferences->getInt("hours", 0);
     settings->minutes = preferences->getInt("minutes", 0);
     settings->seconds = preferences->getInt("seconds", 0);
 
+    settings->temperature1 = preferences->getFloat("temperature1", 20.0);
+    settings->temperature2 = preferences->getFloat("temperature2", 20.0);
+    settings->humidity1 = preferences->getFloat("humidity1", 50.0);
+    settings->humidity2 = preferences->getFloat("humidity2", 50.0);
+
+    settings->ct_lowerHour = preferences->getInt("ct_lowerHour", 0);
+    settings->ct_lowerMinute = preferences->getInt("ct_lowerMinute", 0);
+    settings->ct_upperHour = preferences->getInt("ct_upperHour", 0);
+    settings->ct_upperMinute = preferences->getInt("ct_upperMinute", 0);
+
     settings->crashcounter = preferences->getInt("crashcounter", -1);
+    settings->lastUpdateTime = preferences->getInt("lastUpdateTime", 0);
 
     Serial.println("Werte geladen!");
 }
