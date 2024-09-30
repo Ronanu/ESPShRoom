@@ -10,7 +10,7 @@ void handleSetTimePage(Settings* settings, WebServer& server) {
     // Eingabefelder für die Uhrzeit
     html += "Stunde: <input type=\"number\" name=\"hour\" value=\"" + String(settings->hours) + "\" min=\"0\" max=\"23\"><br>";
     html += "Minute: <input type=\"number\" name=\"minute\" value=\"" + String(settings->minutes) + "\" min=\"0\" max=\"59\"><br>";
-
+    html += "Sekunde: <input type=\"number\" name=\"second\" value=\"" + String(settings->seconds) + "\" min=\"0\" max=\"59\"><br>";
     html += "<input type=\"submit\" value=\"Setze Uhrzeit\">";
     html += "</form>";
     html += "</body></html>";
@@ -22,7 +22,7 @@ void handleSetTime(Settings* settings, WebServer& server, Preferences* preferenc
     if (server.method() == HTTP_POST) {
         settings->hours = server.arg("hour").toInt();
         settings->minutes = server.arg("minute").toInt();
-        settings->seconds = 0; // Sekunden auf 0 setzen
+        settings->seconds = server.arg("second").toInt();
         
         server.sendHeader("Location", "/"); // Umleitung zur Root-Seite
         server.send(303); // 303 Redirect
@@ -40,11 +40,20 @@ void showSetValuesPage(Settings* settings, WebServer& server) {
     html += "<form action=\"/update_values\" method=\"POST\">";
 
     // Soll-Temperatur
-    html += "<h2>Temperaturregler</h2>";
+    html += "<h2>Regler-Werte</h2>";
     html += "Soll-Temperatur (in &deg;C): ";
     html += "<input type=\"number\" name=\"targetTemp\" value=\"" + String(settings->targetTemperature, 1) + "\" step=\"0.1\"><br><br>";
     html += "Hysterese (in &deg;C): ";
     html += "<input type=\"number\" name=\"hysteresis\" value=\"" + String(settings->hysteresis, 2) + "\" step=\"0.1\"><br><br>";
+    html += "Maximale Luftfeuchtigkeit (in %): ";
+    html += "<input type=\"number\" name=\"maxHumidity\" value=\"" + String(settings->maxHumidity, 1) + "\" step=\"0.1\"><br><br>";
+    html += "<h2>Zeitschaltuhr</h2>";
+    html += "Einschaltzeit: ";
+    html += "<input type=\"number\" name=\"ct_lowerHour\" value=\"" + String(settings->ct_lowerHour) + "\" min=\"0\" max=\"23\">:";
+    html += "<input type=\"number\" name=\"ct_lowerMinute\" value=\"" + String(settings->ct_lowerMinute) + "\" min=\"0\" max=\"59\"><br>";
+    html += "Ausschaltzeit: ";
+    html += "<input type=\"number\" name=\"ct_upperHour\" value=\"" + String(settings->ct_upperHour) + "\" min=\"0\" max=\"23\">:";
+    html += "<input type=\"number\" name=\"ct_upperMinute\" value=\"" + String(settings->ct_upperMinute) + "\" min=\"0\" max=\"59\"><br><br>";
 
     // Aktoren
 
@@ -72,15 +81,16 @@ void showSetValuesPage(Settings* settings, WebServer& server) {
     html += "<input type=\"number\" name=\"onTime3\" value=\"" + String(settings->onTime3) + "\" min=\"0\"><br>";
     html += "Zyklusanteil (in Prozent): ";
     html += "<input type=\"number\" name=\"onPercentage3\" value=\"" + String(settings->onPercentage3) + "\" min=\"5\" max=\"100\"><br>";
+    html += "Aktiviert wird anhand des Temperaturreglers.<br>";
     // html += "Aktiviert: <input type=\"checkbox\" name=\"isEnabled3\" " + String(settings->isEnabled3 ? "checked" : "") + "><br><br>";
 
     // Steckdose 2
-    html += "<h3>Steckdose 2</h3>";
+    html += "<h3>Steckdose 2: Lichtsteuerung</h3>";
     html += "Aktive Laufzeit (in Sekunden): ";
     html += "<input type=\"number\" name=\"onTime4\" value=\"" + String(settings->onTime4) + "\" min=\"0\"><br>";
     html += "Zyklusanteil (in Prozent): ";
     html += "<input type=\"number\" name=\"onPercentage4\" value=\"" + String(settings->onPercentage4) + "\" min=\"5\" max=\"100\"><br>";
-    html += "Aktiviert: <input type=\"checkbox\" name=\"isEnabled4\" " + String(settings->isEnabled4 ? "checked" : "") + "><br><br>";
+    html += "Aktiviert wird anhand der Zeitschaltuhr.<br>";
 
     html += "<input type=\"submit\" value=\"speichern\"><br><br>";  // Submit-Button für Aktoreinstellungen
     html += "</form>";
@@ -131,14 +141,35 @@ void handleSetValues(Settings* settings, WebServer& server, Preferences* prefere
         settings->hysteresis = server.arg("hysteresis").toFloat();
     }
 
+    if (server.hasArg("maxHumidity")) {
+        settings->maxHumidity = server.arg("maxHumidity").toFloat();
+    }
+
+    // Clock time settings
+    if (server.hasArg("ct_lowerHour")) {
+        settings->ct_lowerHour = server.arg("ct_lowerHour").toInt();
+    }
+
+    if (server.hasArg("ct_lowerMinute")) {
+        settings->ct_lowerMinute = server.arg("ct_lowerMinute").toInt();
+    }
+
+    if (server.hasArg("ct_upperHour")) {
+        settings->ct_upperHour = server.arg("ct_upperHour").toInt();
+    }
+
+    if (server.hasArg("ct_upperMinute")) {
+        settings->ct_upperMinute = server.arg("ct_upperMinute").toInt();
+    }
+
     // Verarbeiten der neuen isEnabled-Flags
     settings->isEnabled1 = server.hasArg("isEnabled1");
     settings->isEnabled2 = server.hasArg("isEnabled2");
-    settings->isEnabled3 = server.hasArg("isEnabled3");
+    // settings->isEnabled3 is controlled by temperature controller
     settings->isEnabled4 = server.hasArg("isEnabled4");
 
+    // Save updated settings and redirect to root page
+    saveCurrentSettings(*settings, preferences);  
     server.sendHeader("Location", "/"); // Umleitung zur Root-Seite
     server.send(303); // 303 Redirect
-    
-    saveCurrentSettings(*settings, preferences);  
 }

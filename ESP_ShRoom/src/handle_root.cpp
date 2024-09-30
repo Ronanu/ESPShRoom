@@ -38,7 +38,11 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "<h3>Sollzustände</h3>";
     html += "<strong>Soll-Temperatur:\t</strong> <span id='targetTemperature'>" + String(settings->targetTemperature, 1) + "</span> &deg;C<br>";
     html += "<strong>Hysterese:\t</strong> <span id='hysteresis'>" + String(settings->hysteresis, 2) + "</span> &deg;C<br><br>";  // Hysterese fett
+    html += "<strong>Lichtsteuerung:</strong><br>";
+    html += "Einschaltzeit: <span id='ct_lowerHour'>" + String(settings->ct_lowerHour) + "</span> : <span id='ct_lowerMinute'>" + String(settings->ct_lowerMinute) + "</span><br>";
+    html += "Ausschaltzeit: <span id='ct_upperHour'>" + String(settings->ct_upperHour) + "</span> : <span id='ct_upperMinute'>" + String(settings->ct_upperMinute) + "</span><br><br>";
 
+    // Buttons für Einstellungen und Hilfe
     html += "<a href=\"/set_values\" class='btn btn-secondary'>Einstellungen</a> ";
     html += "<a href=\"/help\" class='btn btn-info'>Hilfe</a><br><br>";  // Button für Hilfe
 
@@ -47,24 +51,28 @@ void handleRoot(Settings* settings, WebServer& server) {
     html += "<div class='aktor_settings'>";
 
     // Lüfter 1
-    html += "<h3>L&uuml;fter 1:</h3>";  // Lüfter 1 als Unterüberschrift
+    html += "<h3>L&uuml;fter 1: Zuluft</h3>";  // Lüfter 1 als Unterüberschrift
     html += "Aktive Laufzeit: <span id='onTime1'>" + String(settings->onTime1) + "</span> Sekunden<br>";  // Normaler Text
-    html += "Zyklusanteil: <span id='onPercentage1'>" + String(settings->onPercentage1) + "</span> %<br><br>";  // Normaler Text
+    html += "Zyklusanteil: <span id='onPercentage1'>" + String(settings->onPercentage1) + "</span> %<br>";  // Normaler Text
+    html += "Aktiviert: <span id='isEnabled1'>" + String(settings->isEnabled1 ? "Ja" : "Nein") + "</span><br><br>";  // Aktiviert-Text
 
     // Lüfter 2
-    html += "<h3>L&uuml;fter 2:</h3>";  // Lüfter 2 als Unterüberschrift
+    html += "<h3>L&uuml;fter 2: Umluft</h3>";  // Lüfter 2 als Unterüberschrift
     html += "Aktive Laufzeit: <span id='onTime2'>" + String(settings->onTime2) + "</span> Sekunden<br>";  // Normaler Text
-    html += "Zyklusanteil: <span id='onPercentage2'>" + String(settings->onPercentage2) + "</span> %<br><br>";  // Normaler Text
+    html += "Zyklusanteil: <span id='onPercentage2'>" + String(settings->onPercentage2) + "</span> %<br>";  // Normaler Text
+    html += "Aktiviert: <span id='isEnabled2'>" + String(settings->isEnabled2 ? "Ja" : "Nein") + "</span><br><br>";  // Aktiviert-Text
 
     // Steckdose 1
-    html += "<h3>Steckdose 1:</h3>";  // Steckdose 1 als Unterüberschrift
+    html += "<h3>Steckdose 1: Heizung</h3>";  // Steckdose 1 als Unterüberschrift
     html += "Aktive Laufzeit: <span id='onTime3'>" + String(settings->onTime3) + "</span> Sekunden<br>";  // Normaler Text
-    html += "Zyklusanteil: <span id='onPercentage3'>" + String(settings->onPercentage3) + "</span> %<br><br>";  // Normaler Text
+    html += "Zyklusanteil: <span id='onPercentage3'>" + String(settings->onPercentage3) + "</span> %<br>";  // Normaler Text
+    html += "Aktiviert: <span id='isEnabled3'>" + String(settings->isEnabled3 ? "Ja" : "Nein") + "</span><br><br>";  // Aktiviert-Text
 
     // Steckdose 2
-    html += "<h3>Steckdose 2:</h3>";  // Steckdose 2 als Unterüberschrift
+    html += "<h3>Steckdose 2: Licht</h3>";  // Steckdose 2 als Unterüberschrift
     html += "Aktive Laufzeit: <span id='onTime4'>" + String(settings->onTime4) + "</span> Sekunden<br>";  // Normaler Text
-    html += "Zyklusanteil: <span id='onPercentage4'>" + String(settings->onPercentage4) + "</span> %<br><br>";  // Normaler Text
+    html += "Zyklusanteil: <span id='onPercentage4'>" + String(settings->onPercentage4) + "</span> %<br>";  // Normaler Text
+    html += "Aktiviert: <span id='isEnabled4'>" + String(settings->isEnabled4 ? "Ja" : "Nein") + "</span><br><br>";  // Aktiviert-Text
     html += "</div>";
 
     // Uhranzeige am Ende der Seite in einer Zeile

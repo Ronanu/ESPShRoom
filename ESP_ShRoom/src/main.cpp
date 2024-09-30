@@ -45,6 +45,7 @@ HysteresisController hysteresis_temp_controller(&settings.targetTemperature, &se
 FaultFilter faultfilter1(5);
 FaultFilter faultfilter2(5);
 OfflineClock offline_clock(&settings, &preferences);
+ClockSwitch light_clockswitch(&settings);
 
 
 // Shared sensor data variable
@@ -166,27 +167,16 @@ void loop() {
 
     // Uhrzeit aktualisieren
     offline_clock.updateTime();
+    light_clockswitch.update();
 
     // Regelung der Lüfter und Steckdosen
     //##############################################################################################
     //##############################################################################################
     float lazy_temperature1 = faultfilter1.checkValue(settings.temperature1);
     settings.isEnabled3 = hysteresis_temp_controller.update(settings.isEnabled3, lazy_temperature1);
-
-    // Lüfter 1 hängt an relais 1
-    // Heitzung hängt an Steckdose 1 bzw. relais 3
-
-    float lazy_temperature2 = faultfilter2.checkValue(settings.temperature2);
-    settings.isEnabled1 = true;
-    if (lazy_temperature2 <= settings.targetTemperature + 1) {
-        settings.onPercentage1 = 0;
-    } else if (lazy_temperature2 <= settings.targetTemperature + 2) {
-        settings.onPercentage1 = 50;
-    } else if (lazy_temperature2 <= settings.targetTemperature + 3) {
-        settings.onPercentage1 = 100;
-    } else if (lazy_temperature2 > settings.targetTemperature + 4)  {
-        settings.onPercentage1 = 100;
-        settings.isEnabled3 = false; // Temperaturbegrenzumg im Bauraum
+    settings.isEnabled4 = light_clockswitch.getOutputState();
+    if (settings.humidity1 > settings.maxHumidity) {
+        settings.isEnabled1 = true;
     }
 
     //##############################################################################################
